@@ -14,8 +14,6 @@ struct ContentView: View {
     
     @State private var username: String = "testing@fort.dev"
     @State private var password: String = "B3sF!JxJD3@727q"
-    private let coordinator = WebViewCoordinator()
-    private let messageHandler = ScriptMessageHandler()
     private let openfort = OFSDK()
     
     @State private var webViewRef: WKWebView?
@@ -33,12 +31,6 @@ struct ContentView: View {
             Button("Sign Up") {
                 signUp()
             }
-            WebView(url: contentUrl,
-                    delegate: coordinator,
-                    scriptMessageHandler: messageHandler,
-                    onWebViewCreated: { wkWebView  in
-                self.webViewRef = wkWebView
-            }).hidden()
         }
     }
     
