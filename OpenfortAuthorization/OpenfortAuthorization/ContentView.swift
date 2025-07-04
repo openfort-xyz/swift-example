@@ -8,6 +8,7 @@
 import SwiftUI
 import JavaScriptCore
 import WebKit
+import OpenfortSwift
 
 struct ContentView: View {
     
@@ -15,6 +16,7 @@ struct ContentView: View {
     @State private var password: String = "B3sF!JxJD3@727q"
     private let coordinator = WebViewCoordinator()
     private let messageHandler = ScriptMessageHandler()
+    private let openfort = OFSDK()
     
     @State private var webViewRef: WKWebView?
     var body: some View {
@@ -43,14 +45,7 @@ struct ContentView: View {
     func signIn() {
         let username = self.username  // your @State vars
         let password = self.password
-        let js = "window.openfort.logInWithEmailPasswordSync({email: '\(username)', password: '\(password)'})"
-        webViewRef?.evaluateJavaScript(js, completionHandler: { result, error in
-            if let error = error {
-                print("JavaScript error: \(error)")
-            } else {
-                // Result is always nil, because real data comes via messageHandler
-            }
-        })
+        openfort.loginWith(username, password)
     }
     
     func signUp() {
