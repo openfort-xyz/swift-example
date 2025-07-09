@@ -19,6 +19,9 @@ struct ContentView: View {
     @State private var webViewRef: WKWebView?
     var body: some View {
         VStack(spacing: 10.0) {
+            Text("Enter an email and password below and either sign in to an existing account or sign up")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
             TextField("Username", text: $username)
                 .padding()
                 .background(RoundedRectangle(cornerRadius: 8).stroke(Color.gray, lineWidth: 1))
@@ -31,17 +34,42 @@ struct ContentView: View {
             Button("Sign Up") {
                 signUp()
             }
-        }
+        }.padding(10.0)
     }
     
     func signIn() {
-        let username = self.username  // your @State vars
+        let username = self.username
         let password = self.password
-        openfort.loginWith(username, password)
+        
+        openfort.loginWith(username, password) { result in
+            switch result {
+            case .success(let authResponse):
+                processAuthResponse(authResponse)
+            case .failure(let error):
+                break
+            }
+        }
     }
     
     func signUp() {
-
+        let username = self.username
+        let password = self.password
+        openfort.signUpWith(email: username, password: password, ecosystemGame: nil) { result in
+            switch result {
+            case .success(let signUpResponse):
+                processSignUpResponse(signUpResponse)
+            case .failure(let error):
+            break
+        }
+        }
+    }
+    
+    private func processAuthResponse(_ response: OFAuthorizationResponseProtocol) {
+        
+    }
+    
+    private func processSignUpResponse(_ response: OFSignUpResponseProtocol) {
+        
     }
     
     var contentUrl: URL {
