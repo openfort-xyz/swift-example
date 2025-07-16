@@ -18,7 +18,11 @@ struct ContentView: View {
     
     @State private var webViewRef: WKWebView?
     var body: some View {
-        VStack(spacing: 10.0) {
+        VStack(spacing: 20.0) {
+            Text("Login & Signup")
+                .font(.title)
+                .bold()
+                .padding(.bottom, 4)
             Text("Enter an email and password below and either sign in to an existing account or sign up")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
