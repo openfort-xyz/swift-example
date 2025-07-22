@@ -14,31 +14,40 @@ struct ContentView: View {
     
     @State private var username: String = "testing@fort.dev"
     @State private var password: String = "B3sF!JxJD3@727q"
+    @State private var isLoggedIn = false
+    
     private let openfort = OFSDK()
     
     @State private var webViewRef: WKWebView?
     var body: some View {
-        VStack(spacing: 20.0) {
-            Text("Login & Signup")
-                .font(.title)
-                .bold()
-                .padding(.bottom, 4)
-            Text("Enter an email and password below and either sign in to an existing account or sign up")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-            TextField("Username", text: $username)
-                .padding()
-                .background(RoundedRectangle(cornerRadius: 8).stroke(Color.gray, lineWidth: 1))
-            SecureField("Password", text: $password)
-                .padding()
-                .background(RoundedRectangle(cornerRadius: 8).stroke(Color.gray, lineWidth: 1))
-            Button("Sign In") {
-                signIn()
-            }
-            Button("Sign Up") {
-                signUp()
-            }
-        }.padding(10.0)
+        if isLoggedIn {
+            LoggedInView(email: username, onLogout: {
+                self.isLoggedIn = false
+            })
+        } else {
+            VStack(spacing: 20.0) {
+                Text("Login & Signup")
+                    .font(.title)
+                    .bold()
+                    .padding(.bottom, 4)
+                Text("Enter an email and password below and either sign in to an existing account or sign up")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                TextField("Username", text: $username)
+                    .padding()
+                    .background(RoundedRectangle(cornerRadius: 8).stroke(Color.gray, lineWidth: 1))
+                SecureField("Password", text: $password)
+                    .padding()
+                    .background(RoundedRectangle(cornerRadius: 8).stroke(Color.gray, lineWidth: 1))
+                Button("Sign In") {
+                    signIn()
+                }
+                Button("Sign Up") {
+                    signUp()
+                }
+            }.padding(10.0)
+        }
+        
     }
     
     func signIn() {
@@ -69,7 +78,7 @@ struct ContentView: View {
     }
     
     private func processAuthResponse(_ response: OFAuthorizationResponseProtocol) {
-        
+        self.isLoggedIn = true
     }
     
     private func processSignUpResponse(_ response: OFSignUpResponseProtocol) {
