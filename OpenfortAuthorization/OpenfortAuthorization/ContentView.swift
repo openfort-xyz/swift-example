@@ -78,6 +78,7 @@ struct ContentView: View {
     }
     
     private func processAuthResponse(_ response: OFAuthorizationResponseProtocol) {
+        OFUser.shared.update(from: response)
         self.isLoggedIn = true
     }
     

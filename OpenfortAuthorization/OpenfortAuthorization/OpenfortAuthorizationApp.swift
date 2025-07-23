@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import FirebaseCore
 
 @main
 struct OpenfortAuthorizationApp: App {
@@ -13,5 +14,9 @@ struct OpenfortAuthorizationApp: App {
         WindowGroup {
             ContentView()
         }
+    }
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        FirebaseApp.configure()
+        return true
     }
 }

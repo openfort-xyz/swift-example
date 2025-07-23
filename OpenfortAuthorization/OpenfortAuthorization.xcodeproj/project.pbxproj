@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		4C8E5AC82E12CE280083528F /* OpenfortSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 4C8E5AC72E12CE280083528F /* OpenfortSwift */; };
+		B91518CD2E3120F200642529 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = B91518CC2E3120F200642529 /* FirebaseCore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -69,6 +70,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B91518CD2E3120F200642529 /* FirebaseCore in Frameworks */,
 				4C8E5AC82E12CE280083528F /* OpenfortSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -140,6 +142,7 @@
 			name = OpenfortAuthorization;
 			packageProductDependencies = (
 				4C8E5AC72E12CE280083528F /* OpenfortSwift */,
+				B91518CC2E3120F200642529 /* FirebaseCore */,
 			);
 			productName = OpenfortAuthorization;
 			productReference = 4C0AED772E006E9C0059C4D3 /* OpenfortAuthorization.app */;
@@ -225,6 +228,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				4C8E5AC62E12CE280083528F /* XCRemoteSwiftPackageReference "swift-sdk" */,
+				B91518C82E3116A600642529 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4C0AED782E006E9C0059C4D3 /* Products */;
@@ -439,7 +443,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 15.5;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.openfort.OpenfortAuthorization;
+				PRODUCT_BUNDLE_IDENTIFIER = com.openfort.OpenfortExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
@@ -476,7 +480,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 15.5;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.openfort.OpenfortAuthorization;
+				PRODUCT_BUNDLE_IDENTIFIER = com.openfort.OpenfortExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
@@ -624,6 +628,14 @@
 				kind = branch;
 			};
 		};
+		B91518C82E3116A600642529 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -631,6 +643,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4C8E5AC62E12CE280083528F /* XCRemoteSwiftPackageReference "swift-sdk" */;
 			productName = OpenfortSwift;
+		};
+		B91518CC2E3120F200642529 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B91518C82E3116A600642529 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

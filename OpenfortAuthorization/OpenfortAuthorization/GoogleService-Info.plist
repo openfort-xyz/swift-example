@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>apiKey</key>
+	<string>AIzaSyBZM6VUpQrWgIgkSBw3khutyV-l0Ua7qXE</string>
+	<key>authDomain</key>
+	<string>fir-wagmi-nextjs.firebaseapp.com</string>
+	<key>projectId</key>
+	<string>fir-wagmi-nextjs</string>
+	<key>storageBucket</key>
+	<string>fir-wagmi-nextjs.firebasestorage.app</string>
+	<key>messagingSenderId</key>
+	<string>881086593563</string>
+	<key>appId</key>
+	<string>1:881086593563:web:287b8d3e15c28dc689d6be</string>
+</dict>
+</plist>

@@ -42,7 +42,24 @@ struct LoggedInView: View {
     }
     
     private func recoverWallet() {
-        print("Recover Wallet tapped")
+        openfort.getAccessToken { result in
+            switch result {
+            case .success(let token):
+                let chainId = "80002"
+                let configuration = OFConfigureEmbeddedWalletDTO(chainId: chainId, shieldAuthentication: OFShieldAuthenticationDTO(auth: "openfort", token: token.accessToken ?? "" , authProvider: "", tokenType: "accessToken"), recoveryParams: OFRecoveryParamsDTO(recoveryMethod: "automatic", password: nil))
+                openfort.configure(params: configuration) { result in
+                    switch result {
+                    case .success:
+                        print("Wallet configured successfully")
+                    case .failure(let error):
+                        print("Wallet configuration error: \(error)")
+                    }
+                }
+                print("Access token: \(token)")
+            case .failure(let error):
+                print("Error: \(error)")
+            }
+        }
     }
     
     private func logout() {
