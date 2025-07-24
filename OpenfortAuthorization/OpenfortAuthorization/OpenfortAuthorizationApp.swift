@@ -6,17 +6,15 @@
 //
 
 import SwiftUI
-import FirebaseCore
 
 @main
 struct OpenfortAuthorizationApp: App {
+    
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
         }
-    }
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        FirebaseApp.configure()
-        return true
     }
 }

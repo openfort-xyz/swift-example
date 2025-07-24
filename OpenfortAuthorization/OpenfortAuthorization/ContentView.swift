@@ -9,6 +9,8 @@ import SwiftUI
 import JavaScriptCore
 import WebKit
 import OpenfortSwift
+import FirebaseAuth
+
 
 struct ContentView: View {
     
@@ -17,6 +19,7 @@ struct ContentView: View {
     @State private var isLoggedIn = false
     
     private let openfort = OFSDK()
+    @State private var handle: AuthStateDidChangeListenerHandle?
     
     @State private var webViewRef: WKWebView?
     var body: some View {
@@ -46,14 +49,25 @@ struct ContentView: View {
                     Button("Sign Up") {
                         signUp()
                     }
+                    Button("Firebase Sign In") {
+                        firebaseSignIn()
+                    }
+                    Button("Firebase Sign Up") {
+                        firebaseSignUp()
+                    }
                 }.padding(10.0)
             }
         }.onAppear {
+            handle = Auth.auth().addStateDidChangeListener { auth, user in
+              // ...
+            }
             if let token = OFKeychainHelper.retrieve(for: OFKeychainHelper.authTokenKey), !token.isEmpty {
                 isLoggedIn = true
             } else {
                 isLoggedIn = false
             }
+        }.onDisappear {
+            Auth.auth().removeStateDidChangeListener(handle!)
         }
     }
     
@@ -81,6 +95,18 @@ struct ContentView: View {
             case .failure(let error):
             break
         }
+        }
+    }
+    
+    func firebaseSignIn() {
+        Auth.auth().signIn(withEmail: username, password: password) { authResult, error in
+
+        }
+    }
+    
+    func firebaseSignUp() {
+        Auth.auth().createUser(withEmail: username, password: password) { authResult, error in
+
         }
     }
     

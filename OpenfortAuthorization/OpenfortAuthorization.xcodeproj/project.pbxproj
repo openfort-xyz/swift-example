@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		4C8E5AC82E12CE280083528F /* OpenfortSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 4C8E5AC72E12CE280083528F /* OpenfortSwift */; };
 		B91518CD2E3120F200642529 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = B91518CC2E3120F200642529 /* FirebaseCore */; };
+		B91518D42E3255A800642529 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = B91518D32E3255A800642529 /* FirebaseAuth */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -71,6 +72,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B91518CD2E3120F200642529 /* FirebaseCore in Frameworks */,
+				B91518D42E3255A800642529 /* FirebaseAuth in Frameworks */,
 				4C8E5AC82E12CE280083528F /* OpenfortSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -143,6 +145,7 @@
 			packageProductDependencies = (
 				4C8E5AC72E12CE280083528F /* OpenfortSwift */,
 				B91518CC2E3120F200642529 /* FirebaseCore */,
+				B91518D32E3255A800642529 /* FirebaseAuth */,
 			);
 			productName = OpenfortAuthorization;
 			productReference = 4C0AED772E006E9C0059C4D3 /* OpenfortAuthorization.app */;
@@ -648,6 +651,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = B91518C82E3116A600642529 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseCore;
+		};
+		B91518D32E3255A800642529 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B91518C82E3116A600642529 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
