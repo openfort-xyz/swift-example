@@ -10,7 +10,9 @@ import OpenfortSwift
 
 struct LoggedInView: View {
     let email: String
+    let authProvider : String
     let onLogout: () -> Void
+    
     private let openfort = OFSDK()
     @State private var showLogoutAlert = false
     
@@ -42,6 +44,15 @@ struct LoggedInView: View {
     }
     
     private func recoverWallet() {
+        if authProvider == "firebase" {
+            processFirebaseRecover()
+        } else {
+            processOpenfortRecover()
+        }
+        
+    }
+    
+    private func processOpenfortRecover() {
         openfort.getAccessToken { result in
             switch result {
             case .success(let token):
@@ -60,6 +71,10 @@ struct LoggedInView: View {
                 print("Error: \(error)")
             }
         }
+    }
+    
+    private func processFirebaseRecover() {
+        
     }
     
     private func logout() {

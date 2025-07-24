@@ -20,12 +20,13 @@ struct ContentView: View {
     
     private let openfort = OFSDK()
     @State private var handle: AuthStateDidChangeListenerHandle?
+    @State private var authProvider: String?
     
     @State private var webViewRef: WKWebView?
     var body: some View {
         Group {
             if isLoggedIn {
-                LoggedInView(email: username, onLogout: {
+                LoggedInView(email: username, authProvider: authProvider ?? "", onLogout: {
                     self.isLoggedIn = false
                 })
             } else {
@@ -59,7 +60,15 @@ struct ContentView: View {
             }
         }.onAppear {
             handle = Auth.auth().addStateDidChangeListener { auth, user in
-              // ...
+                user?.getIDToken(completion: { idToken, error in
+                    if let idToken = idToken {
+                        openfort.authenticateWithThirdPartyProvider(provider: "firebase", token: idToken, tokenType: "idToken", ecosystemGame: nil) { result in
+                            // handle result
+                        }
+                    } else {
+                        print("Failed to get idToken: \(error?.localizedDescription ?? "Unknown error")")
+                    }
+                })
             }
             if let token = OFKeychainHelper.retrieve(for: OFKeychainHelper.authTokenKey), !token.isEmpty {
                 isLoggedIn = true
@@ -100,7 +109,10 @@ struct ContentView: View {
     
     func firebaseSignIn() {
         Auth.auth().signIn(withEmail: username, password: password) { authResult, error in
-
+            if error == nil {
+                authProvider = "firebase"
+                isLoggedIn = true
+            }
         }
     }
     
