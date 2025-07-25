@@ -7,6 +7,7 @@
 
 import SwiftUI
 import OpenfortSwift
+import FirebaseAuth
 
 struct LoggedInView: View {
     let email: String
@@ -78,6 +79,10 @@ struct LoggedInView: View {
     }
     
     private func logout() {
+        if Auth.auth().currentUser != nil {
+            try? Auth.auth().signOut()
+        }
+        
         openfort.logOut { result in
             switch result {
             case .success:

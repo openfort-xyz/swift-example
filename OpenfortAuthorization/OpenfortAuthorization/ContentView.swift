@@ -60,7 +60,9 @@ struct ContentView: View {
             }
         }.onAppear {
             handle = Auth.auth().addStateDidChangeListener { auth, user in
-                
+                if user != nil {
+                    isLoggedIn = true
+                }
             }
             if let token = OFKeychainHelper.retrieve(for: OFKeychainHelper.authTokenKey), !token.isEmpty {
                 isLoggedIn = true
@@ -75,28 +77,29 @@ struct ContentView: View {
     func signIn() {
         let username = self.username
         let password = self.password
-        
-        openfort.loginWith(username, password) { result in
+        let params = OFAuthEmailPasswordParams(email: username, password: password)
+        openfort.loginWith(params: params, completion: { result in
             switch result {
             case .success(let authResponse):
                 processAuthResponse(authResponse)
             case .failure(let error):
                 break
             }
-        }
+        })
     }
     
     func signUp() {
         let username = self.username
         let password = self.password
-        openfort.signUpWith(email: username, password: password, ecosystemGame: nil) { result in
+        let params = OFSignUpWithEmailPasswordParams(email: username, password: password)
+        openfort.signUpWith(params: params, completion: { result in
             switch result {
             case .success(let signUpResponse):
                 processSignUpResponse(signUpResponse)
             case .failure(let error):
-            break
-        }
-        }
+                break
+            }
+        })
     }
     
     func firebaseSignIn() {
@@ -104,9 +107,10 @@ struct ContentView: View {
             if error == nil {
                 authResult?.user.getIDToken(completion: { idToken, error in
                     if let idToken = idToken {
-                        openfort.authenticateWithThirdPartyProvider(provider: "firebase", token: idToken, tokenType: "idToken", ecosystemGame: nil) { result in
-                            // handle result
-                        }
+                        let params = OFAuthenticateWithThirdPartyProviderParams(provider: "firebase", token: idToken, tokenType: "idToken")
+                        openfort.authenticateWithThirdPartyProvider(params: params, completion: { result in
+                            
+                        })
                     } else {
                         print("Failed to get idToken: \(error?.localizedDescription ?? "Unknown error")")
                     }
@@ -119,7 +123,7 @@ struct ContentView: View {
     
     func firebaseSignUp() {
         Auth.auth().createUser(withEmail: username, password: password) { authResult, error in
-
+            
         }
     }
     
