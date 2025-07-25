@@ -60,15 +60,7 @@ struct ContentView: View {
             }
         }.onAppear {
             handle = Auth.auth().addStateDidChangeListener { auth, user in
-                user?.getIDToken(completion: { idToken, error in
-                    if let idToken = idToken {
-                        openfort.authenticateWithThirdPartyProvider(provider: "firebase", token: idToken, tokenType: "idToken", ecosystemGame: nil) { result in
-                            // handle result
-                        }
-                    } else {
-                        print("Failed to get idToken: \(error?.localizedDescription ?? "Unknown error")")
-                    }
-                })
+                
             }
             if let token = OFKeychainHelper.retrieve(for: OFKeychainHelper.authTokenKey), !token.isEmpty {
                 isLoggedIn = true
@@ -110,6 +102,15 @@ struct ContentView: View {
     func firebaseSignIn() {
         Auth.auth().signIn(withEmail: username, password: password) { authResult, error in
             if error == nil {
+                authResult?.user.getIDToken(completion: { idToken, error in
+                    if let idToken = idToken {
+                        openfort.authenticateWithThirdPartyProvider(provider: "firebase", token: idToken, tokenType: "idToken", ecosystemGame: nil) { result in
+                            // handle result
+                        }
+                    } else {
+                        print("Failed to get idToken: \(error?.localizedDescription ?? "Unknown error")")
+                    }
+                })
                 authProvider = "firebase"
                 isLoggedIn = true
             }
