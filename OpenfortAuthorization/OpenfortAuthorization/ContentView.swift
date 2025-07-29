@@ -18,7 +18,8 @@ struct ContentView: View {
     @State private var password: String = "B3sF!JxJD3@727q"
     @State private var isLoggedIn = false
     
-    private let openfort = OFSDK()
+    private let openfort = OFSDK.shared
+    
     @State private var handle: AuthStateDidChangeListenerHandle?
     @State private var authProvider: String?
     
@@ -61,13 +62,8 @@ struct ContentView: View {
         }.onAppear {
             handle = Auth.auth().addStateDidChangeListener { auth, user in
                 if user != nil {
-                    isLoggedIn = true
+                    handleFirebaseAuth(user!)
                 }
-            }
-            if let token = OFKeychainHelper.retrieve(for: OFKeychainHelper.authTokenKey), !token.isEmpty {
-                isLoggedIn = true
-            } else {
-                isLoggedIn = false
             }
         }.onDisappear {
             Auth.auth().removeStateDidChangeListener(handle!)
@@ -105,20 +101,35 @@ struct ContentView: View {
     func firebaseSignIn() {
         Auth.auth().signIn(withEmail: username, password: password) { authResult, error in
             if error == nil {
-                authResult?.user.getIDToken(completion: { idToken, error in
-                    if let idToken = idToken {
-                        let params = OFAuthenticateWithThirdPartyProviderParams(provider: "firebase", token: idToken, tokenType: "idToken")
-                        openfort.authenticateWithThirdPartyProvider(params: params, completion: { result in
-                            
-                        })
-                    } else {
-                        print("Failed to get idToken: \(error?.localizedDescription ?? "Unknown error")")
-                    }
-                })
-                authProvider = "firebase"
-                isLoggedIn = true
+                if let user = authResult?.user {
+                    handleFirebaseAuth(user)
+                }
             }
         }
+    }
+    
+    private func handleFirebaseAuth(_ user: User) {
+        user.getIDToken(completion: { idToken, error in
+            if let idToken = idToken {
+                if openfort.isInitialized {
+                    processThirdPatyAuth(idToken)
+                } else {
+                    openfort.didLoad = {
+                        processThirdPatyAuth(idToken)
+                    }
+                }
+            } else {
+                print("Failed to get idToken: \(error?.localizedDescription ?? "Unknown error")")
+            }
+        })
+    }
+    
+    private func processThirdPatyAuth(_ idToken: String) {
+        let params = OFAuthenticateWithThirdPartyProviderParams(provider: "firebase", token: idToken, tokenType: "idToken")
+        openfort.authenticateWithThirdPartyProvider(params: params, completion: { result in
+            authProvider = "firebase"
+            isLoggedIn = true
+        })
     }
     
     func firebaseSignUp() {

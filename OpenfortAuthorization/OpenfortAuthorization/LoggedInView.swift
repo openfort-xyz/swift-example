@@ -14,33 +14,53 @@ struct LoggedInView: View {
     let authProvider : String
     let onLogout: () -> Void
     
-    private let openfort = OFSDK()
+    private let openfort = OFSDK.shared
+    
     @State private var showLogoutAlert = false
+    @State private var embeddedState = 0
     
     var body: some View {
-        VStack(spacing: 20.0) {
-            Text("Welcome, \(email)!")
-                .font(.title2)
+        Group {
+            VStack(spacing: 20.0) {
+                Text("Welcome, \(email)!")
+                    .font(.title2)
+                    .padding()
+                if embeddedState != 4 {
+                    Button("Recover Wallet") {
+                        recoverWallet()
+                    }
+                }
+                Button("Logout") {
+                    showLogoutAlert = true
+                }
+                .foregroundColor(.red)
                 .padding()
-            Button("Recover Wallet") {
-                recoverWallet()
             }
-            Button("Logout") {
-                showLogoutAlert = true
+            .alert(
+                "Log Out",
+                isPresented: $showLogoutAlert
+            ) {
+                Button("Log Out", role: .destructive) {
+                    logout()
+                }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("Are you sure you want to log out?")
             }
-            .foregroundColor(.red)
-            .padding()
+        }.onAppear {
+            
         }
-        .alert(
-            "Log Out",
-            isPresented: $showLogoutAlert
-        ) {
-            Button("Log Out", role: .destructive) {
-                logout()
+        
+    }
+    
+    private func getEmbeddedState() {
+        openfort.getEmbeddedState { result in
+            switch result {
+            case .success(let state):
+                print("Embedded state: \(state)")
+            case .failure(let error):
+                print("Failed to get embedded state: \(error.localizedDescription)")
             }
-            Button("Cancel", role: .cancel) { }
-        } message: {
-            Text("Are you sure you want to log out?")
         }
     }
     
@@ -50,15 +70,14 @@ struct LoggedInView: View {
         } else {
             processOpenfortRecover()
         }
-        
     }
     
     private func processOpenfortRecover() {
         openfort.getAccessToken { result in
             switch result {
             case .success(let token):
-                let chainId = "80002"
-                let configuration = OFConfigureEmbeddedWalletDTO(chainId: chainId, shieldAuthentication: OFShieldAuthenticationDTO(auth: "openfort", token: token.accessToken ?? "" , authProvider: "", tokenType: "accessToken"), recoveryParams: OFRecoveryParamsDTO(recoveryMethod: "automatic", password: nil))
+                let chainId = 80002
+                let configuration = OFConfigureEmbeddedWalletDTO(chainId: chainId, shieldAuthentication: OFShieldAuthenticationDTO(auth: "openfort", token: token , authProvider: "", tokenType: "accessToken"), recoveryParams: OFRecoveryParamsDTO(recoveryMethod: "automatic", password: nil))
                 openfort.configure(params: configuration) { result in
                     switch result {
                     case .success:
@@ -75,7 +94,15 @@ struct LoggedInView: View {
     }
     
     private func processFirebaseRecover() {
-        
+        Auth.auth().currentUser?.getIDTokenResult(completion: { result, error in
+            if let result = result {
+                let token = result.token
+                let chainId = 80002
+                openfort.configure(params: OFConfigureEmbeddedWalletDTO(chainId: chainId, shieldAuthentication: OFShieldAuthenticationDTO(auth: "openfort", token: token , authProvider: "firebase", tokenType: "idToken"), recoveryParams: OFRecoveryParamsDTO(recoveryMethod: "automatic", password: nil)), completion: { result in
+                    
+                })
+            }
+        })
     }
     
     private func logout() {
