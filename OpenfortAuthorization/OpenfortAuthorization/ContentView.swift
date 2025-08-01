@@ -74,6 +74,7 @@ struct ContentView: View {
         let username = self.username
         let password = self.password
         let params = OFAuthEmailPasswordParams(email: username, password: password)
+        
         openfort.loginWith(params: params, completion: { result in
             switch result {
             case .success(let authResponse):
@@ -127,8 +128,14 @@ struct ContentView: View {
     private func processThirdPatyAuth(_ idToken: String) {
         let params = OFAuthenticateWithThirdPartyProviderParams(provider: "firebase", token: idToken, tokenType: "idToken")
         openfort.authenticateWithThirdPartyProvider(params: params, completion: { result in
-            authProvider = "firebase"
-            isLoggedIn = true
+            switch result {
+            case .success(let authResponse):
+                authProvider = "firebase"
+                isLoggedIn = true
+            case .failure(let error):
+                break
+            }
+           
         })
     }
     

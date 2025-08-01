@@ -21,34 +21,38 @@ struct LoggedInView: View {
     
     var body: some View {
         Group {
-            VStack(spacing: 20.0) {
-                Text("Welcome, \(email)!")
-                    .font(.title2)
-                    .padding()
-                if embeddedState != 4 {
-                    Button("Recover Wallet") {
-                        recoverWallet()
+            if embeddedState == 4 {
+                SignatureView(onSign: { /* action */ }, onLogout: logout)
+            } else {
+                VStack(spacing: 20.0) {
+                    Text("Welcome, \(email)!")
+                        .font(.title2)
+                        .padding()
+                    if embeddedState != 4 {
+                        Button("Recover Wallet") {
+                            recoverWallet()
+                        }
                     }
+                    Button("Logout") {
+                        showLogoutAlert = true
+                    }
+                    .foregroundColor(.red)
+                    .padding()
                 }
-                Button("Logout") {
-                    showLogoutAlert = true
+                .alert(
+                    "Log Out",
+                    isPresented: $showLogoutAlert
+                ) {
+                    Button("Log Out", role: .destructive) {
+                        logout()
+                    }
+                    Button("Cancel", role: .cancel) { }
+                } message: {
+                    Text("Are you sure you want to log out?")
                 }
-                .foregroundColor(.red)
-                .padding()
-            }
-            .alert(
-                "Log Out",
-                isPresented: $showLogoutAlert
-            ) {
-                Button("Log Out", role: .destructive) {
-                    logout()
-                }
-                Button("Cancel", role: .cancel) { }
-            } message: {
-                Text("Are you sure you want to log out?")
             }
         }.onAppear {
-            
+            getEmbeddedState()
         }
         
     }
@@ -57,6 +61,7 @@ struct LoggedInView: View {
         openfort.getEmbeddedState { result in
             switch result {
             case .success(let state):
+                embeddedState = state
                 print("Embedded state: \(state)")
             case .failure(let error):
                 print("Failed to get embedded state: \(error.localizedDescription)")
@@ -81,6 +86,7 @@ struct LoggedInView: View {
                 openfort.configure(params: configuration) { result in
                     switch result {
                     case .success:
+                        getEmbeddedState()
                         print("Wallet configured successfully")
                     case .failure(let error):
                         print("Wallet configuration error: \(error)")
