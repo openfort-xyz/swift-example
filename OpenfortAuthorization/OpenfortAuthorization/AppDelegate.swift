@@ -12,7 +12,7 @@ import OpenfortSwift
 class AppDelegate: NSObject, UIApplicationDelegate {
     // Example: didFinishLaunching
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        OFSDK.shared.initialize()
+        OFSDK.setupSDK()
         FirebaseApp.configure()
         return true
     }
