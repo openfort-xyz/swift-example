@@ -105,7 +105,13 @@ struct LoggedInView: View {
                 let token = result.token
                 let chainId = 80002
                 openfort.configure(params: OFConfigureEmbeddedWalletDTO(chainId: chainId, shieldAuthentication: OFShieldAuthenticationDTO(auth: "openfort", token: token , authProvider: "firebase", tokenType: "idToken"), recoveryParams: OFRecoveryParamsDTO(recoveryMethod: "automatic", password: nil)), completion: { result in
-                    
+                    switch result {
+                    case .success:
+                        getEmbeddedState()
+                        print("Wallet configured successfully")
+                    case .failure(let error):
+                        print("Wallet configuration error: \(error)")
+                    }
                 })
             }
         })
