@@ -14,147 +14,269 @@ import FirebaseAuth
 
 struct ContentView: View {
     
-    @State private var username: String = "testing@fort.dev"
+    @State private var email: String = "testing@fort.dev"
     @State private var password: String = "B3sF!JxJD3@727q"
-    @State private var isLoggedIn = false
-    
+    @State private var showPassword: Bool = false
+    @State private var isLoading: Bool = false
+    @State private var errorMessage: String?
+    @State private var showResetPassword = false
+    @State private var showSignUp = false
+    @State private var showToast: Bool = false
+    @State private var toastMessage: String = ""
+    @State private var isSignedIn = false
+    @StateObject private var homeViewModel = HomeViewModel()
     private let openfort = OFSDK.shared
     
-    @State private var handle: AuthStateDidChangeListenerHandle?
-    @State private var authProvider: String?
-    
-    @State private var webViewRef: WKWebView?
     var body: some View {
-        Group {
-            if isLoggedIn {
-                LoggedInView(email: username, authProvider: authProvider ?? "", onLogout: {
-                    self.isLoggedIn = false
-                })
+        NavigationView {
+            if !isSignedIn {
+                ZStack {
+                    Color(.systemGroupedBackground).ignoresSafeArea()
+                    VStack {
+                        Spacer(minLength: 40)
+                        VStack(alignment: .leading, spacing: 0) {
+                            Text("Sign in to account")
+                                .font(.system(size: 24, weight: .semibold))
+                                .foregroundColor(.primary)
+                                .padding(.bottom, 24)
+                            
+                            VStack(spacing: 18) {
+                                VStack(alignment: .leading) {
+                                    Text("Email address")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    TextField("Email", text: $email)
+                                        .keyboardType(.emailAddress)
+                                        .autocapitalization(.none)
+                                        .padding(.vertical, 8)
+                                        .padding(.horizontal, 12)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                        )
+                                }
+                                
+                                VStack(alignment: .leading) {
+                                    Text("Password")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    HStack {
+                                        if showPassword {
+                                            TextField("Password", text: $password)
+                                                .autocapitalization(.none)
+                                        } else {
+                                            SecureField("Password", text: $password)
+                                                .autocapitalization(.none)
+                                        }
+                                        Button(action: { showPassword.toggle() }) {
+                                            Image(systemName: showPassword ? "eye.slash" : "eye")
+                                                .foregroundColor(.gray)
+                                        }
+                                    }
+                                    .padding(.vertical, 8)
+                                    .padding(.horizontal, 12)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                    )
+                                }
+                                HStack {
+                                    Spacer()
+                                    Button("Forgot password?") {
+                                        showResetPassword = true
+                                    }
+                                    .font(.caption)
+                                    .foregroundColor(.blue)
+                                }
+                            }
+                            .padding(.bottom, 8)
+                            
+                            Button(action: {
+                                Task {
+                                    await signIn()
+                                }
+                            }) {
+                                if isLoading {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle())
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 12)
+                                } else {
+                                    Text("Sign in to account")
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 12)
+                                }
+                            }
+                            .disabled(isLoading)
+                            .background(isLoading ? Color.gray.opacity(0.2) : Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
+                            .padding(.top, 12)
+                            
+                            Button(action: {
+                                Task {
+                                    await continueAsGuest()
+                                }
+                            }) {
+                                Text("Continue as Guest")
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 12)
+                                    .background(Color.white)
+                                    .foregroundColor(.blue)
+                                    .cornerRadius(8)
+                                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.blue, lineWidth: 1))
+                            }
+                            .padding(.top, 12)
+                            
+                            // Divider
+                            HStack {
+                                Rectangle()
+                                    .frame(height: 1)
+                                    .foregroundColor(.gray.opacity(0.3))
+                                Text("Or continue with")
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                                    .padding(.horizontal, 4)
+                                Rectangle()
+                                    .frame(height: 1)
+                                    .foregroundColor(.gray.opacity(0.3))
+                            }
+                            .padding(.vertical, 16)
+                            
+                            // Social buttons
+                            VStack(spacing: 8) {
+                                HStack(spacing: 8) {
+                                    socialButton("Continue with Google", icon: "globe") { continueWithGoogle() }
+                                    socialButton("Continue with Twitter", icon: "bird") { continueWithTwitter() }
+                                }
+                                HStack(spacing: 8) {
+                                    socialButton("Continue with Facebook", icon: "f.square") { continueWithFacebook() }
+                                    socialButton("Continue with Wallet", icon: "wallet.pass") { continueWithWallet() }
+                                }
+                            }
+                            
+                            HStack {
+                                Text("Don’t have an account?")
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                                Button("Sign up") {
+                                    showSignUp = true
+                                }
+                                .foregroundColor(.blue)
+                                .font(.subheadline)
+                            }
+                            .padding(.top, 24)
+                        }
+                        .padding(28)
+                        .background(Color.white)
+                        .cornerRadius(16)
+                        .shadow(color: Color.black.opacity(0.10), radius: 10, x: 0, y: 4)
+                        .padding(.horizontal, 8)
+                        
+                        Spacer()
+                    }
+                    
+                    // Toast
+                    if showToast {
+                        Text(toastMessage)
+                            .padding()
+                            .background(Color.black.opacity(0.8))
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                            .transition(.move(edge: .top))
+                            .onAppear {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                    withAnimation { showToast = false }
+                                }
+                            }
+                            .zIndex(2)
+                    }
+                }
+                // Modals
+                .sheet(isPresented: $showResetPassword) {
+                    ResetPasswordView(email: email)
+                }
+                .sheet(isPresented: $showSignUp) {
+                    RegisterView()
+                }
             } else {
-                VStack(spacing: 20.0) {
-                    Text("Login & Signup")
-                        .font(.title)
-                        .bold()
-                        .padding(.bottom, 4)
-                    Text("Enter an email and password below and either sign in to an existing account or sign up")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                    TextField("Username", text: $username)
-                        .padding()
-                        .background(RoundedRectangle(cornerRadius: 8).stroke(Color.gray, lineWidth: 1))
-                    SecureField("Password", text: $password)
-                        .padding()
-                        .background(RoundedRectangle(cornerRadius: 8).stroke(Color.gray, lineWidth: 1))
-                    Button("Sign In") {
-                        signIn()
+                HomeView(viewModel: homeViewModel).onAppear {
+                    homeViewModel.onLogout = {
+                        isSignedIn = false
                     }
-                    Button("Sign Up") {
-                        signUp()
-                    }
-                    Button("Firebase Sign In") {
-                        firebaseSignIn()
-                    }
-                    Button("Firebase Sign Up") {
-                        firebaseSignUp()
-                    }
-                }.padding(10.0)
-            }
-        }.onAppear {
-            handle = Auth.auth().addStateDidChangeListener { auth, user in
-                if user != nil {
-                    handleFirebaseAuth(user!)
                 }
             }
-        }.onDisappear {
-            Auth.auth().removeStateDidChangeListener(handle!)
         }
     }
     
-    func signIn() {
-        let username = self.username
+    func signIn() async {
+        isLoading = true
+        let username = self.email
         let password = self.password
         let params = OFAuthEmailPasswordParams(email: username, password: password)
         
-        openfort.loginWith(params: params, completion: { result in
-            switch result {
-            case .success(let authResponse):
-                processAuthResponse(authResponse)
-            case .failure(let error):
-                break
-            }
-        })
-    }
-    
-    func signUp() {
-        let username = self.username
-        let password = self.password
-        let params = OFSignUpWithEmailPasswordParams(email: username, password: password)
-        openfort.signUpWith(params: params, completion: { result in
-            switch result {
-            case .success(let signUpResponse):
-                processSignUpResponse(signUpResponse)
-            case .failure(let error):
-                break
-            }
-        })
-    }
-    
-    func firebaseSignIn() {
-        Auth.auth().signIn(withEmail: username, password: password) { authResult, error in
-            if error == nil {
-                if let user = authResult?.user {
-                    handleFirebaseAuth(user)
-                }
-            }
+        do {
+            let authResponse = try await openfort.loginWith(params: params)
+            isSignedIn = true
+            toastMessage = "Signed in!"
+        } catch {
+            toastMessage = "Failed to sign in: \(error.localizedDescription)"
         }
+        isLoading = false
+        showToast = true
     }
     
-    private func handleFirebaseAuth(_ user: User) {
-        user.getIDToken(completion: { idToken, error in
-            if let idToken = idToken {
-                if openfort.isInitialized {
-                    processThirdPatyAuth(idToken)
-                } else {
-                    openfort.didLoad = {
-                        processThirdPatyAuth(idToken)
-                    }
-                }
-            } else {
-                print("Failed to get idToken: \(error?.localizedDescription ?? "Unknown error")")
-            }
-        })
-    }
-    
-    private func processThirdPatyAuth(_ idToken: String) {
-        let params = OFAuthenticateWithThirdPartyProviderParams(provider: "firebase", token: idToken, tokenType: "idToken")
-        openfort.authenticateWithThirdPartyProvider(params: params, completion: { result in
-            switch result {
-            case .success(let authResponse):
-                authProvider = "firebase"
-                isLoggedIn = true
-            case .failure(let error):
-                break
-            }
-           
-        })
-    }
-    
-    func firebaseSignUp() {
-        Auth.auth().createUser(withEmail: username, password: password) { authResult, error in
-            
+    func continueAsGuest() async {
+        isLoading = true
+        do {
+            let signUpResponse = try await openfort.signUpGuest()
+            isSignedIn = true
+            toastMessage = "Signed in as Guest!"
+        } catch {
+            toastMessage = "Failed to sign in as Guest: \(error.localizedDescription)"
         }
+        isLoading = false
+        showToast = true
     }
     
-    private func processAuthResponse(_ response: OFAuthorizationResponseProtocol) {
-        OFUser.shared.update(from: response)
-        self.isLoggedIn = true
+    func continueWithGoogle() {
+        toastMessage = "Continue with Google (not implemented)"
+        showToast = true
     }
     
-    private func processSignUpResponse(_ response: OFSignUpResponseProtocol) {
-        
+    func continueWithTwitter() {
+        toastMessage = "Continue with Twitter (not implemented)"
+        showToast = true
     }
     
-    var contentUrl: URL {
+    func continueWithFacebook() {
+        toastMessage = "Continue with Facebook (not implemented)"
+        showToast = true
+    }
+    
+    func continueWithWallet() {
+        toastMessage = "Continue with Wallet (not implemented)"
+        showToast = true
+    }
+    
+    func socialButton(_ text: String, icon: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack {
+                Image(systemName: icon)
+                Text(text)
+                    .font(.footnote)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+        }
+        .background(Color.white)
+        .foregroundColor(.blue)
+        .cornerRadius(8)
+        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.blue, lineWidth: 1))
+    }
+    
+    
+    private var contentUrl: URL {
         Bundle.main.url(forResource: "index", withExtension: "html")!
     }
 }
