@@ -10,7 +10,8 @@ import JavaScriptCore
 import WebKit
 import OpenfortSwift
 import FirebaseAuth
-
+import FirebaseCore
+import GoogleSignIn
 
 struct ContentView: View {
     
@@ -240,18 +241,106 @@ struct ContentView: View {
     }
     
     func continueWithGoogle() {
-        toastMessage = "Continue with Google (not implemented)"
-        showToast = true
+        isLoading = true
+        guard let clientID = FirebaseApp.app()?.options.clientID else {
+            toastMessage = "Missing Google client ID"
+            showToast = true
+            return
+        }
+        let config = GIDConfiguration(clientID: clientID)
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let rootViewController = windowScene.windows.first?.rootViewController else {
+            toastMessage = "Unable to get rootViewController"
+            showToast = true
+            return
+        }
+        GIDSignIn.sharedInstance.configuration = config
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let rootViewController = windowScene.windows.first?.rootViewController else {
+            return
+        }
+        GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController, hint: nil, additionalScopes: nil, completion:{ signInResult, error in
+            isLoading = false
+            if let error = error {
+                toastMessage = "Google Sign-In failed: \(error.localizedDescription)"
+                showToast = true
+                return
+            }
+            guard let user = signInResult?.user,
+                  let idToken = user.idToken?.tokenString else {
+                toastMessage = "Failed to get Google ID Token"
+                showToast = true
+                return
+            }
+            let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: user.accessToken.tokenString)
+            Auth.auth().signIn(with: credential) { authResult, error in
+                if let error = error {
+                    toastMessage = "Firebase Auth failed: \(error.localizedDescription)"
+                    showToast = true
+                } else {
+                    Task {
+                        await authoriseToOpenfortWith(authResult, message: "Signed in with Google!")
+                    }
+                }
+            }
+        } )
     }
     
     func continueWithTwitter() {
-        toastMessage = "Continue with Twitter (not implemented)"
-        showToast = true
+        isLoading = true
+        let provider = OAuthProvider(providerID: "twitter.com")
+        provider.getCredentialWith(nil) { credential, error in
+            isLoading = false
+            if let error = error {
+                toastMessage = "Twitter Sign-In failed: \(error.localizedDescription)"
+                showToast = true
+                return
+            }
+            guard let credential = credential else {
+                toastMessage = "Failed to get Twitter credential"
+                showToast = true
+                return
+            }
+            Auth.auth().signIn(with: credential) { authResult, error in
+                if let error = error {
+                    toastMessage = "Firebase Auth failed: \(error.localizedDescription)"
+                    showToast = true
+                } else {
+                    Task {
+                        await authoriseToOpenfortWith(authResult, message: "Signed in with Twitter!")
+                    }
+                }
+            }
+        }
     }
     
     func continueWithFacebook() {
-        toastMessage = "Continue with Facebook (not implemented)"
-        showToast = true
+        isLoading = true
+        let provider = OAuthProvider(providerID: "facebook.com")
+        provider.getCredentialWith(nil) { credential, error in
+            if let error = error {
+                isLoading = false
+                toastMessage = "Facebook Sign-In failed: \(error.localizedDescription)"
+                showToast = true
+                return
+            }
+            guard let credential = credential else {
+                toastMessage = "Failed to get Facebook credential"
+                showToast = true
+                return
+            }
+            Auth.auth().signIn(with: credential) { authResult, error in
+                if let error = error {
+                    isLoading = false
+                    toastMessage = "Firebase Auth failed: \(error.localizedDescription)"
+                    showToast = true
+                } else {
+                    Task {
+                        await authoriseToOpenfortWith(authResult, message: "Signed in with Facebook!")
+                    }
+                }
+            }
+        }
     }
     
     func continueWithWallet() {
@@ -275,6 +364,26 @@ struct ContentView: View {
         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.blue, lineWidth: 1))
     }
     
+    private func authoriseToOpenfortWith(_ result: AuthDataResult?, message: String) async {
+        
+        guard let authResult = result else {
+            fatalError("Unexpected nil authResult")
+        }
+        do {
+            let token = try await authResult.user.getIDToken()
+            let authResponse = try await openfort.loginWithIdToken(params: OFLoginWithIdTokenParams(provider: "firebase", token: token))
+            isLoading = false
+            toastMessage = message
+            showToast = true
+            
+        } catch {
+            isLoading = false
+            toastMessage = "Openfort Auth failed: \(error.localizedDescription)"
+            showToast = true
+            return
+        }
+        
+    }
     
     private var contentUrl: URL {
         Bundle.main.url(forResource: "index", withExtension: "html")!
