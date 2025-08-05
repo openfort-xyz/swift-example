@@ -76,12 +76,13 @@ struct SignTypedDataButton: View {
         
         do {
             let params = OFSignTypedDataParams(
-                domain: domain,
-                types: types,
-                value: data
+                domain: domain.mapValues { AnyCodable($0) },
+                types: types.mapValues { AnyCodable($0) },
+                message: data.mapValues { AnyCodable($0) }
             )
+
             let result = try await OFSDK.shared.signTypedData(params: params)
-            handleSetMessage(result.signature ?? "Signed!")
+            handleSetMessage(result?.signature ?? "Signed!")
         } catch {
             print("Failed to sign typed message:", error)
             // You could display an error toast here if you wish
