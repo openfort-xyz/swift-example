@@ -63,7 +63,7 @@ struct HomeView: View {
                                     AccountActionsView(handleSetMessage: viewModel.handleSetMessage)
                                     
                                     // Signatures
-                                    SignaturesPanelView(handleSetMessage: viewModel.handleSetMessage)
+                                    SignaturesPanelView(handleSetMessage: viewModel.handleSetMessage, embeddedState: viewModel.state)
                                     
                                     // Linked socials
                                     LinkedSocialsPanelView(user: viewModel.user, handleSetMessage: viewModel.handleSetMessage)
@@ -178,6 +178,8 @@ struct SidebarIntroView: View {
 
 struct SignaturesPanelView: View {
     let handleSetMessage: (String) -> Void
+    let embeddedState: OFEmbeddedState
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Signatures")
@@ -186,10 +188,14 @@ struct SignaturesPanelView: View {
                 Text("Message: ").fontWeight(.medium)
                 Text("Hello World!")
             }
-            Button("Sign message") { handleSetMessage("Signed message!") }
+            SignMessageButton(handleSetMessage: { message in
+                handleSetMessage("Signed message: \(message)")
+            }, embeddedState: embeddedState)
             HStack {
                 Text("Typed message: ").fontWeight(.medium)
-                Button("Sign typed data") { handleSetMessage("Signed typed data!") }
+                SignTypedDataButton(handleSetMessage: { message in
+                    handleSetMessage("Signed typed data: \(message)")
+                }, embeddedState: embeddedState)
             }
         }
         .padding()
