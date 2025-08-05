@@ -276,23 +276,32 @@ class HomeViewModel: ObservableObject {
     
     private var cancellable: AnyCancellable?
 
-    var handleRecovery: (_ method: RecoveryMethod, _ password: String?) async throws -> Void
+    lazy var handleRecovery: (_ method: RecoveryMethod, _ password: String?) async throws -> Void = { method, password in
+        if method == .password {
+            guard let password = password, !password.isEmpty else {
+                throw MissingRecoveryPasswordError()
+            }
+            // Simulate password check, replace with Openfort SDK call
+            if password != "correct_password" {
+                throw WrongRecoveryPasswordError()
+            }
+            
+        } else {
+            do {
+                guard let token = try await Auth.auth().currentUser?.getIDToken() else {
+                    self.message = "Error fetching ID token.\n\n" + self.message
+                    return
+                }
+                let result = try await OFSDK.shared.configure(params: OFConfigureEmbeddedWalletDTO(chainId: 80002, shieldAuthentication: OFShieldAuthenticationDTO(auth: "openfort", token: token, authProvider: "firebase", tokenType: "idToken"), recoveryParams: OFRecoveryParamsDTO(recoveryMethod: "automatic", password: nil)))
+                self.message = "Embedded wallet configured successfully.\n\n" + self.message
+            } catch {
+                self.message = "Error configuring embedded wallet: \(error)\n\n" + self.message
+            }
+            
+        }
+    }
 
     init() {
-        self.handleRecovery = { method, password in
-            if method == .password {
-                guard let password = password, !password.isEmpty else {
-                    throw MissingRecoveryPasswordError()
-                }
-                // Simulate password check, replace with Openfort SDK call
-                if password != "correct_password" {
-                    throw WrongRecoveryPasswordError()
-                }
-                
-            } else {
-                // Simulate automatic recovery, replace with Openfort SDK call
-            }
-        }
         self.cancellable = OFSDK.shared.embeddedStatePublisher
             .replaceNil(with: .none)
             .receive(on: DispatchQueue.main)

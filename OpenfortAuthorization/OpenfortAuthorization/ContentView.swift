@@ -214,17 +214,16 @@ struct ContentView: View {
         isLoading = true
         let username = self.email
         let password = self.password
-        let params = OFAuthEmailPasswordParams(email: username, password: password)
         
         do {
-            let authResponse = try await openfort.loginWith(params: params)
-            isSignedIn = true
-            toastMessage = "Signed in!"
+            let result = try await Auth.auth().signIn(withEmail: username, password: password)
+            await authoriseToOpenfortWith(result, message: "Signed in!")
         } catch {
             toastMessage = "Failed to sign in: \(error.localizedDescription)"
+            isLoading = false
+            showToast = true
+            return
         }
-        isLoading = false
-        showToast = true
     }
     
     func continueAsGuest() async {
@@ -371,10 +370,11 @@ struct ContentView: View {
         }
         do {
             let token = try await authResult.user.getIDToken()
-            let authResponse = try await openfort.loginWithIdToken(params: OFLoginWithIdTokenParams(provider: "firebase", token: token))
+            let authResponse = try await openfort.authenticateWithThirdPartyProvider(params: OFAuthenticateWithThirdPartyProviderParams(provider: "firebase", token: token, tokenType: "idToken"))
             isLoading = false
             toastMessage = message
             showToast = true
+            isSignedIn = true
             
         } catch {
             isLoading = false
