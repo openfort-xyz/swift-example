@@ -72,7 +72,7 @@ struct HomeView: View {
                                     EmbeddedWalletPanelView(handleSetMessage: viewModel.handleSetMessage)
                                     
                                     // Wallet Connect
-                                    WalletConnectPanelView(handleSetMessage: viewModel.handleSetMessage)
+                                    WalletConnectPanelView(viewModel: WalletConnectPanelViewModel())
                                     
                                     // Funding
                                     FundingPanelView(handleSetMessage: viewModel.handleSetMessage)
@@ -176,35 +176,6 @@ struct SidebarIntroView: View {
 
 // MARK: - Helper Subviews
 
-struct SignaturesPanelView: View {
-    let handleSetMessage: (String) -> Void
-    let embeddedState: OFEmbeddedState
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Signatures")
-                .font(.headline)
-            HStack {
-                Text("Message: ").fontWeight(.medium)
-                Text("Hello World!")
-            }
-            SignMessageButton(handleSetMessage: { message in
-                handleSetMessage("Signed message: \(message)")
-            }, embeddedState: embeddedState)
-            HStack {
-                Text("Typed message: ").fontWeight(.medium)
-                SignTypedDataButton(handleSetMessage: { message in
-                    handleSetMessage("Signed typed data: \(message)")
-                }, embeddedState: embeddedState)
-            }
-        }
-        .padding()
-        .background(Color.white)
-        .cornerRadius(12)
-        .shadow(radius: 4)
-    }
-}
-
 struct LinkedSocialsPanelView: View {
     let user: UserModel?
     let handleSetMessage: (String) -> Void
@@ -231,40 +202,6 @@ struct LinkedSocialsPanelView: View {
     }
 }
 
-struct EmbeddedWalletPanelView: View {
-    let handleSetMessage: (String) -> Void
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Embedded wallet").font(.headline)
-            HStack {
-                Text("Export wallet private key: ").fontWeight(.medium)
-                Button("Export") { handleSetMessage("Exported private key") }
-            }
-            Text("Change wallet recovery:")
-            Button("Set wallet recovery") { handleSetMessage("Wallet recovery set") }
-        }
-        .padding()
-        .background(Color.white)
-        .cornerRadius(12)
-        .shadow(radius: 4)
-    }
-}
-
-struct WalletConnectPanelView: View {
-    let handleSetMessage: (String) -> Void
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Wallet Connect").font(.headline)
-            Text("Connect via WalletConnect:")
-            Button("Set Pairing Code") { handleSetMessage("Pairing code set") }
-        }
-        .padding()
-        .background(Color.white)
-        .cornerRadius(12)
-        .shadow(radius: 4)
-    }
-}
-
 // MARK: - Models & Toast
 
 @MainActor
@@ -275,39 +212,30 @@ class HomeViewModel: ObservableObject {
     var onLogout: (() -> Void)?
     
     private var cancellable: AnyCancellable?
-
+    
     lazy var handleRecovery: (_ method: RecoveryMethod, _ password: String?) async throws -> Void = { method, password in
-        if method == .password {
-            guard let password = password, !password.isEmpty else {
-                throw MissingRecoveryPasswordError()
-            }
-            // Simulate password check, replace with Openfort SDK call
-            if password != "correct_password" {
-                throw WrongRecoveryPasswordError()
-            }
-            
-        } else {
-            do {
-                guard let token = try await Auth.auth().currentUser?.getIDToken() else {
-                    self.message = "Error fetching ID token.\n\n" + self.message
-                    return
-                }
-                let result = try await OFSDK.shared.configure(params: OFConfigureEmbeddedWalletDTO(chainId: 80002, shieldAuthentication: OFShieldAuthenticationDTO(auth: "openfort", token: token, authProvider: "firebase", tokenType: "idToken"), recoveryParams: OFRecoveryParamsDTO(recoveryMethod: "automatic", password: nil)))
-                self.message = "Embedded wallet configured successfully.\n\n" + self.message
-            } catch {
-                self.message = "Error configuring embedded wallet: \(error)\n\n" + self.message
-            }
-            
+        guard let token = try await Auth.auth().currentUser?.getIDToken() else {
+            self.message = "Error fetching ID token.\n\n" + self.message
+            return
         }
+        let chainId = 80002
+        let shield = OFShieldAuthenticationDTO(auth: "openfort", token: token, authProvider: "firebase", tokenType: "idToken")
+        do {
+            let result = try await OFSDK.shared.configure(params: OFConfigureEmbeddedWalletDTO(chainId: chainId, shieldAuthentication: shield, recoveryParams: OFRecoveryParamsDTO(recoveryMethod: method == .password ? "password" : "automatic", password: password)))
+            self.message = "Embedded wallet configured successfully.\n\n" + self.message
+        } catch {
+            self.message = "Error configuring embedded wallet: \(error)\n\n" + self.message
+        }
+        
     }
-
+    
     init() {
         self.cancellable = OFSDK.shared.embeddedStatePublisher
             .replaceNil(with: .none)
             .receive(on: DispatchQueue.main)
             .assign(to: \.state, on: self)
     }
-
+    
     func logout() async {
         do {
             try await OFSDK.shared.logOut()
