@@ -29,11 +29,14 @@ struct HomeView: View {
                                 // Logout
                                 HStack {
                                     Spacer()
-                                    Button("Logout") {
+                                    Button(role: .destructive) {
                                         Task {
                                             await logout()
                                         }
+                                    } label: {
+                                        Label("Logout", systemImage: "arrow.right.square")
                                     }
+                                    .tint(.red)
                                 }
                                 // Account recovery component slot
                                 AccountRecoveryView(handleRecovery: viewModel.handleRecovery)
@@ -58,7 +61,15 @@ struct HomeView: View {
                                 Text("Welcome, \(viewModel.user?.id ?? "user")!")
                                     .font(.subheadline)
                                     .foregroundColor(.gray)
-                                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 20) {
+                                Button(role: .destructive) {
+                                    Task {
+                                        await logout()
+                                    }
+                                } label: {
+                                    Label("Logout", systemImage: "arrow.right.square")
+                                }
+                                .tint(.red)
+                                VStack(spacing: 20) {
                                     // Account actions
                                     AccountActionsView(handleSetMessage: viewModel.handleSetMessage)
                                     
@@ -174,34 +185,6 @@ struct SidebarIntroView: View {
     }
 }
 
-// MARK: - Helper Subviews
-
-struct LinkedSocialsPanelView: View {
-    let user: UserModel?
-    let handleSetMessage: (String) -> Void
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Linked socials").font(.headline)
-            HStack {
-                Text("Get user: ").fontWeight(.medium)
-                Button("Get user") { handleSetMessage("User: \(user?.id ?? "n/a")") }
-            }
-            Text("OAuth methods")
-            // Add real OAuth buttons as needed
-            HStack {
-                Button("Google") { handleSetMessage("OAuth Google") }
-                Button("Twitter") { handleSetMessage("OAuth Twitter") }
-                Button("Facebook") { handleSetMessage("OAuth Facebook") }
-            }
-            Button("Link a Wallet") { handleSetMessage("Link wallet clicked") }
-        }
-        .padding()
-        .background(Color.white)
-        .cornerRadius(12)
-        .shadow(radius: 4)
-    }
-}
-
 // MARK: - Models & Toast
 
 @MainActor
@@ -268,10 +251,7 @@ class HomeViewModel: ObservableObject {
     }
 }
 
-struct UserModel {
-    var id: String
-    var displayName: String?
-}
+
 
 extension View {
     func toast(isPresented: Binding<Bool>, message: String) -> some View {

@@ -204,6 +204,8 @@ struct ContentView: View {
                 HomeView(viewModel: homeViewModel).onAppear {
                     homeViewModel.onLogout = {
                         isSignedIn = false
+                        toastMessage = "Sigend Out!"
+                        showToast = true
                     }
                 }
             }
