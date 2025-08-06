@@ -18,7 +18,7 @@ struct LinkedSocialsPanelView: View {
             Text("Linked socials").font(.headline)
             HStack {
                 Text("Get user: ").fontWeight(.medium)
-                Button("Get user") { handleSetMessage("User: \(user?.id ?? "n/a")") }
+                GetUserButton(handleSetMessage: handleSetMessage)
             }
             Text("OAuth methods")
             // Add real OAuth buttons as needed
