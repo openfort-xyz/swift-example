@@ -168,7 +168,10 @@ struct RegisterView: View {
                         .padding(.vertical, 16)
 
                         VStack(spacing: 8) {
-                            socialButton("Continue with Google", icon: "globe") { toast("Google sign-up (not implemented)") }
+                            socialButton("Continue with Google", icon: "globe") {
+                                Task{
+                                    try await openfort.initOAuth(params: OFInitOAuthParams)
+                                } }
                             socialButton("Continue with Twitter", icon: "bird") { toast("Twitter sign-up (not implemented)") }
                             socialButton("Continue with Facebook", icon: "f.square") { toast("Facebook sign-up (not implemented)") }
                             socialButton("Continue with Wallet", icon: "wallet.pass") { toast("Wallet sign-up (not implemented)") }
