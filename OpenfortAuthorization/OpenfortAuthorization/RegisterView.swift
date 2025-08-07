@@ -10,7 +10,7 @@ import OpenfortSwift
 
 struct RegisterView: View {
     @Environment(\.dismiss) var dismiss
-
+    
     @State private var firstName: String = ""
     @State private var lastName: String = ""
     @State private var email: String = ""
@@ -55,7 +55,7 @@ struct RegisterView: View {
                                 .font(.system(size: 24, weight: .semibold))
                                 .foregroundColor(.primary)
                                 .padding(.bottom, 24)
-
+                            
                             VStack(spacing: 12) {
                                 HStack(spacing: 8) {
                                     VStack(alignment: .leading) {
@@ -130,9 +130,11 @@ struct RegisterView: View {
                                 }
                             }
                             .padding(.bottom, 12)
-
+                            
                             Button(action: {
-                                signUp()
+                                Task {
+                                    await signUp()
+                                }
                             }) {
                                 if isLoading {
                                     ProgressView()
@@ -151,7 +153,7 @@ struct RegisterView: View {
                             .cornerRadius(8)
                             .padding(.top, 8)
                         }
-
+                        
                         // Divider
                         HStack {
                             Rectangle()
@@ -166,17 +168,19 @@ struct RegisterView: View {
                                 .foregroundColor(.gray.opacity(0.3))
                         }
                         .padding(.vertical, 16)
-
+                        
                         VStack(spacing: 8) {
                             socialButton("Continue with Google", icon: "globe") {
-                                Task{
-                                    try await openfort.initOAuth(params: OFInitOAuthParams)
-                                } }
-                            socialButton("Continue with Twitter", icon: "bird") { toast("Twitter sign-up (not implemented)") }
-                            socialButton("Continue with Facebook", icon: "f.square") { toast("Facebook sign-up (not implemented)") }
-                            socialButton("Continue with Wallet", icon: "wallet.pass") { toast("Wallet sign-up (not implemented)") }
+                                handleSocialAuth(provider: "google")
+                            }
+                            socialButton("Continue with Twitter", icon: "bird") { handleSocialAuth(provider: "twitter")
+                            }
+                            socialButton("Continue with Facebook", icon: "f.square") { handleSocialAuth(provider: "facebook") }
+                            socialButton("Continue with Wallet", icon: "wallet.pass") { Task{
+                                let response = try await openfort.initOAuth(params: OFInitOAuthParams(provider: "wallet", options: ["redirectTo":AnyCodable("http://localhost:5173/login")]))
+                            } }
                         }
-
+                        
                         VStack(alignment: .leading, spacing: 0) {
                             Text("By signing up, you accept ")
                                 .font(.caption2)
@@ -212,7 +216,7 @@ struct RegisterView: View {
                                     .foregroundColor(.gray)
                             }
                         }
-
+                        
                         HStack {
                             Text("Have an account?")
                                 .font(.subheadline)
@@ -230,10 +234,10 @@ struct RegisterView: View {
                     .cornerRadius(16)
                     .shadow(color: Color.black.opacity(0.10), radius: 10, x: 0, y: 4)
                     .padding(.horizontal, 8)
-
+                    
                     Spacer()
                 }
-
+                
                 // Toast
                 if showToast {
                     Text(toastMessage)
@@ -252,11 +256,31 @@ struct RegisterView: View {
             }
         }
     }
-
+    
+    private func handleSocialAuth(provider: String) {
+        Task {
+            do {
+                let response = try await openfort.initOAuth(
+                    params: OFInitOAuthParams(
+                        provider: provider,
+                        options: ["redirectTo": AnyCodable("http://localhost:5173/login")]
+                    )
+                )
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    isLoading = false
+                    emailConfirmation = true
+                    toast("Successfully signed up with " + provider.capitalized)
+                }
+            } catch {
+                toast("Failed to sign in with \(provider.capitalized): \(error)")
+            }
+        }
+    }
+    
     func openURL(_ url: URL) {
         UIApplication.shared.open(url)
     }
-
+    
     func signUp() async {
         // Validate password
         guard checkPassword(password) else {
@@ -285,7 +309,7 @@ struct RegisterView: View {
         }
         
     }
-
+    
     func checkPassword(_ pw: String) -> Bool {
         let lower = pw.range(of: "[a-z]", options: .regularExpression) != nil
         let upper = pw.range(of: "[A-Z]", options: .regularExpression) != nil
@@ -293,12 +317,12 @@ struct RegisterView: View {
         let digit = pw.range(of: "\\d", options: .regularExpression) != nil
         return pw.count >= 8 && lower && upper && special && digit
     }
-
+    
     func toast(_ message: String) {
         toastMessage = message
         withAnimation { showToast = true }
     }
-
+    
     func socialButton(_ text: String, icon: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack {
