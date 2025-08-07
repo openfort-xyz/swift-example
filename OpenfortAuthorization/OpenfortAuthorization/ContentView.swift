@@ -373,6 +373,8 @@ struct ContentView: View {
         do {
             let token = try await authResult.user.getIDToken()
             let authResponse = try await openfort.authenticateWithThirdPartyProvider(params: OFAuthenticateWithThirdPartyProviderParams(provider: "firebase", token: token, tokenType: "idToken"))
+
+            let linkResponse = try await openfort.linkEmailPassword(params: OFLinkEmailPasswordParams(email: email, password: password, authToken: token))
             isLoading = false
             toastMessage = message
             showToast = true

@@ -232,23 +232,6 @@ class HomeViewModel: ObservableObject {
     func handleSetMessage(_ msg: String) {
         message = "> \(msg)\n\n" + message
     }
-    
-    private func processFirebaseRecover(_ method: RecoveryMethod, _ password: String?) {
-        Auth.auth().currentUser?.getIDTokenResult(completion: { result, error in
-            if let result = result {
-                let token = result.token
-                let chainId = 80002
-                OFSDK.shared.configure(params: OFConfigureEmbeddedWalletDTO(chainId: chainId, shieldAuthentication: OFShieldAuthenticationDTO(auth: "openfort", token: token , authProvider: "firebase", tokenType: "idToken"), recoveryParams: OFRecoveryParamsDTO(recoveryMethod: "automatic", password: nil)), completion: { result in
-                    switch result {
-                    case .success:
-                        print("Wallet configured successfully")
-                    case .failure(let error):
-                        print("Wallet configuration error: \(error)")
-                    }
-                })
-            }
-        })
-    }
 }
 
 

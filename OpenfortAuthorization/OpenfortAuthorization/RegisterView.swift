@@ -254,7 +254,7 @@ struct RegisterView: View {
         UIApplication.shared.open(url)
     }
 
-    func signUp() {
+    func signUp() async {
         // Validate password
         guard checkPassword(password) else {
             error = "invalidPassword"
@@ -263,13 +263,24 @@ struct RegisterView: View {
         }
         error = nil
         isLoading = true
-        // Call your Openfort signUpWithEmailPassword logic here
-        // Simulate async result:
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+        do {
+            let result = try await openfort.signUpWith(params: OFSignUpWithEmailPasswordParams(email: email, password: password))
+            if let action = result?.action, action == "verify_email" {
+                let verifyEmailResult = try await openfort.requestEmailVerification(params: OFRequestEmailVerificationParams(email: email, redirectUrl: "http://localhost:5173/login"))
+                OFKeychainHelper.save(email, for: "email")
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                isLoading = false
+                emailConfirmation = true
+                toast("Successfully signed up! Check your email.")
+            }
+        } catch  {
             isLoading = false
-            emailConfirmation = true
-            toast("Successfully signed up! Check your email.")
+            toast("Failed to sign up: \(error)")
+            return
         }
+        
     }
 
     func checkPassword(_ pw: String) -> Bool {
