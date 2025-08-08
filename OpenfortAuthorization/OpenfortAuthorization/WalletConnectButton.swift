@@ -116,7 +116,6 @@ func createSIWEMessage(address: String, nonce: String, chainId: Int) -> String {
 func signMessage(_ message: String, with wallet: WalletConnector) async throws -> String {
     let result = try await OFSDK.shared.signMessage(params: OFSignMessageParams(message: message))
     return result ?? ""
-    
 }
 
 func authenticateOrLink(signature: String, message: String, wallet: WalletConnectorInfo, link: Bool) async throws {

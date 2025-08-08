@@ -7,7 +7,7 @@
 
 import Foundation
 class SIWEUtils {
-    private func createSIWEMessage(
+    private static func createSIWEMessage(
         domain: String,
         address: String,
         statement: String? = nil,
