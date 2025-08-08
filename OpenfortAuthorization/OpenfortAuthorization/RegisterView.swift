@@ -20,6 +20,7 @@ struct RegisterView: View {
     @State private var isLoading: Bool = false
     @State private var error: String? = nil
     @State private var showToast: Bool = false
+    @State private var showConnectWallet = false
     @State private var toastMessage: String = ""
     private var openfort = OFSDK.shared
     
@@ -175,10 +176,15 @@ struct RegisterView: View {
                             }
                             socialButton("Continue with Twitter", icon: "bird") { handleSocialAuth(provider: "twitter")
                             }
-                            socialButton("Continue with Facebook", icon: "f.square") { handleSocialAuth(provider: "facebook") }
-                            socialButton("Continue with Wallet", icon: "wallet.pass") { Task{
-                                let response = try await openfort.initOAuth(params: OFInitOAuthParams(provider: "wallet", options: ["redirectTo":AnyCodable("http://localhost:5173/login")]))
-                            } }
+                            socialButton("Continue with Facebook", icon: "f.square") { handleSocialAuth(provider: "facebook")
+                            }
+                            socialButton("Continue with Wallet", icon: "wallet.pass") {
+                                showConnectWallet = true
+                            }.sheet(isPresented: $showConnectWallet) {
+                                ConnectWalletView(onSignIn: {
+                                    dismiss()
+                                })
+                            }
                         }
                         
                         VStack(alignment: .leading, spacing: 0) {

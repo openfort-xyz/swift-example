@@ -13,7 +13,7 @@ import FirebaseAuth
 import FirebaseCore
 import GoogleSignIn
 
-struct ContentView: View {
+struct LoginView: View {
     
     @State private var email: String = "testing@fort.dev"
     @State private var password: String = "B3sF!JxJD3@727q"
@@ -25,6 +25,7 @@ struct ContentView: View {
     @State private var showToast: Bool = false
     @State private var toastMessage: String = ""
     @State private var isSignedIn = false
+    @State private var showConnectWallet = false
     @StateObject private var homeViewModel = HomeViewModel()
     private let openfort = OFSDK.shared
     
@@ -200,6 +201,11 @@ struct ContentView: View {
                 .sheet(isPresented: $showSignUp) {
                     RegisterView()
                 }
+                .sheet(isPresented: $showConnectWallet) {
+                    ConnectWalletView(onSignIn: {
+                        showConnectWallet = false
+                    })
+                }
             } else {
                 HomeView(viewModel: homeViewModel).onAppear {
                     homeViewModel.onLogout = {
@@ -345,8 +351,7 @@ struct ContentView: View {
     }
     
     func continueWithWallet() {
-        toastMessage = "Continue with Wallet (not implemented)"
-        showToast = true
+        showConnectWallet = true
     }
     
     func socialButton(_ text: String, icon: String, action: @escaping () -> Void) -> some View {
@@ -373,8 +378,6 @@ struct ContentView: View {
         do {
             let token = try await authResult.user.getIDToken()
             let authResponse = try await openfort.authenticateWithThirdPartyProvider(params: OFAuthenticateWithThirdPartyProviderParams(provider: "firebase", token: token, tokenType: "idToken"))
-
-            let linkResponse = try await openfort.linkEmailPassword(params: OFLinkEmailPasswordParams(email: email, password: password, authToken: token))
             isLoading = false
             toastMessage = message
             showToast = true
@@ -395,5 +398,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    LoginView()
 }
