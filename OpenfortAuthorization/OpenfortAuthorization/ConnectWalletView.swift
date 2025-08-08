@@ -118,7 +118,7 @@ struct WalletButton: View {
     var body: some View {
         Button(action: connectWallet) {
             HStack {
-                Image(systemName: connector == .metamask ? "cube.box" : "wallet.pass")
+                Image(systemName: connector == .metaMask ? "cube.box" : "wallet.pass")
                 Text("Continue with \(connector.rawValue)")
                     .bold()
             }

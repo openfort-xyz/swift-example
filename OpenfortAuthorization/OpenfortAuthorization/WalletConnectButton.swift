@@ -16,15 +16,15 @@ struct WalletConnectorInfo: Identifiable {
 }
 
 enum WalletConnector: String, CaseIterable, Identifiable {
-    case metamask, coinbase, walletconnect
+    case metaMask, coinbase, walletConnect
     var id: String { rawValue }
 }
 
 // Dummy icons, replace with your own
 let availableWallets: [WalletConnectorInfo] = [
-    .init(id: "metamask", name: "MetaMask", iconName: "cube.box", type: .metamask),
+    .init(id: "metamask", name: "MetaMask", iconName: "cube.box", type: .metaMask),
     .init(id: "coinbase", name: "Coinbase", iconName: "wallet.pass", type: .coinbase),
-    .init(id: "walletconnect", name: "WalletConnect", iconName: "link", type: .walletconnect)
+    .init(id: "walletconnect", name: "WalletConnect", iconName: "link", type: .walletConnect)
 ]
 
 // This would be your main buttons section
@@ -51,15 +51,10 @@ struct WalletConnectButtonsSection: View {
         loadingButtonId = wallet.id
         Task {
             do {
-                // 1. Initiate wallet connection (show QR, deeplink, etc.)
-                let address = try await connectToWallet(wallet.type)
-                // 2. Get nonce from backend (openfort)
+                let address = wallet.type.rawValue
                 let nonce = try await fetchNonce(address: address)
-                // 3. Create SIWE message
                 let siweMessage = createSIWEMessage(address: address, nonce: nonce, chainId: 80001)
-                // 4. Request signature from wallet
                 let signature = try await signMessage(siweMessage, with: wallet.type)
-                // 5. Authenticate or link with backend
                 try await authenticateOrLink(signature: signature, message: siweMessage, wallet: wallet, link: link)
                 onSuccess()
             } catch {
@@ -98,11 +93,6 @@ struct WalletConnectButton: View {
 }
 
 // MARK: - Helper/Network Logic Stubs
-func connectToWallet(_ type: WalletConnector) async throws -> String {
-    // Integrate with WalletConnect, MetaMask, etc.
-    // Return user's Ethereum address
-    throw NSError(domain: "stub", code: -1)
-}
 
 func fetchNonce(address: String) async throws -> String {
     let result =  try await OFSDK.shared.initSIWE(params: OFInitSIWEParams(address: address))
