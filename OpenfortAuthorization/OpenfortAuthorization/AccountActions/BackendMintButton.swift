@@ -37,24 +37,13 @@ struct BackendMintButton: View {
     }
 
     func mintNFT() async -> String? {
-        // TODO: Get access token from Openfort singleton
-        let accessToken = await OFSDK.shared.getAccessToken { result in
-            switch result {
-            case .success(let token):
-                print("Access token: \(token)")
-            case .failure(let error):
-                print("Failed to get access token: \(error)")
-            }
-        }
-
-        // Prepare your API call (use your endpoint)
-        guard let url = URL(string: "https://yourdomain.com/api/protected-collect") else { return nil }
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-
         do {
+            let accessToken = try await OFSDK.shared.getAccessToken()
+            guard let url = URL(string: "https://yourdomain.com/api/protected-collect") else { return nil }
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
             let (data, response) = try await URLSession.shared.data(for: request)
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
                 // Handle error
