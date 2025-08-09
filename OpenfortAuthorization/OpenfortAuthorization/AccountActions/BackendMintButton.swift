@@ -66,8 +66,7 @@ struct BackendMintButton: View {
             let collectResponse = try JSONDecoder().decode(CollectResponse.self, from: data)
 
             // TODO: Send signature transaction intent request with Openfort
-            let transactionHash = try await OFSDK.shared.sendSignatureTransactionIntentRequest(params: OFSendSignatureTransactionIntentRequestParams(transactionIntentId: collectResponse.transactionIntentId, signableHash: collectResponse.userOperationHash))?.transactionHash
-            
+            let transactionHash = try await OFSDK.shared.sendSignatureTransactionIntentRequest(params: OFSendSignatureTransactionIntentRequestParams(transactionIntentId: collectResponse.transactionIntentId, signableHash: collectResponse.userOperationHash))?.response?.transactionHash
 
             return transactionHash
         } catch {

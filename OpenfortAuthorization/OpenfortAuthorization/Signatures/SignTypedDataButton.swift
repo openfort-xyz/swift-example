@@ -82,7 +82,7 @@ struct SignTypedDataButton: View {
             )
 
             let result = try await OFSDK.shared.signTypedData(params: params)
-            handleSetMessage(result?.signature ?? "Signed!")
+            handleSetMessage(result ?? "Signed!")
         } catch {
             print("Failed to sign typed message:", error)
             // You could display an error toast here if you wish

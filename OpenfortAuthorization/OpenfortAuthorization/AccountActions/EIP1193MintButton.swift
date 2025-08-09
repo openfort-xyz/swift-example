@@ -54,6 +54,7 @@ struct EIP1193MintButton: View {
             // Example placeholders:
             do {
                 let provider = try await openfort.getEthereumProvider(params: OFGetEthereumProviderParams())
+                handleSetMessage("Provider: \(provider ?? "empty")")
             } catch  {
                 handleSetMessage("Failed to get EVM provider")
                 return
@@ -79,6 +80,7 @@ struct EIP1193MintButton: View {
             // --- Your EVM provider logic here ---
             do {
                 let provider = try await openfort.getEthereumProvider(params: OFGetEthereumProviderParams())
+                handleSetMessage("Provider: \(provider ?? "empty")")
             } catch {
                 handleSetMessage("Failed to get EVM provider")
                 return
