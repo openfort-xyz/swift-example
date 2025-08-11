@@ -10,11 +10,21 @@ import FirebaseCore
 import OpenfortSwift
 
 class AppDelegate: NSObject, UIApplicationDelegate {
-    // Example: didFinishLaunching
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        OFSDK.setupSDK()
+        
+        if let config = OFConfig.load(from: getConfigData()) {
+            OFSDK.setupSDK(config: config)
+        }
+        
         FirebaseApp.configure()
         return true
     }
     
+    private func getConfigData() -> Data? {
+        if let url = Bundle.main.url(forResource: "OFConfig", withExtension: "plist") {
+            return try? Data(contentsOf: url)
+        }
+        return nil
+    }
 }
