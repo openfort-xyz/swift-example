@@ -85,7 +85,7 @@ struct SignTypedDataButton: View {
             handleSetMessage(result ?? "Signed!")
         } catch {
             print("Failed to sign typed message:", error)
-            // You could display an error toast here if you wish
+            handleSetMessage("Failed to sign typed message: \(error.localizedDescription)")
         }
     }
 }
