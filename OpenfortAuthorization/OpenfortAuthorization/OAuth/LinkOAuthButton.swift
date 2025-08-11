@@ -17,7 +17,8 @@ struct LinkOAuthButton: View {
     var handleSetMessage: ((String) -> Void)? = nil
 
     var isLinked: Bool {
-        guard let user = user, let linkedAccounts = user.linkedAccounts else { return false }
+        guard let user = user else { return false }
+        let linkedAccounts = user.linkedAccounts
         return linkedAccounts.contains(where: { $0.provider == provider })
     }
 

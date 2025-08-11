@@ -2,9 +2,9 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>backendURL</key>
+	<key>backendUr</key>
 	<string></string>
-	<key>iframeURL</key>
+	<key>iframeUr</key>
 	<string>http://localhost:5173</string>
 	<key>openfortPublishableKey</key>
 	<string>pk_test_15238963-23a6-5e6b-a32c-8b8f27414db7</string>
@@ -12,7 +12,7 @@
 	<string>AnOZE0fPHC4+n+8jpg9mCNXmPMVY0eRVewi7dQ/7G2yv</string>
 	<key>shieldPublishableKey</key>
 	<string>3a3ef549-5d4c-4f6d-b5cf-42881c23c2de</string>
-	<key>shieldURL</key>
+	<key>shieldUrl</key>
 	<string></string>
 </dict>
 </plist>
