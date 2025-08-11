@@ -216,6 +216,44 @@ struct LoginView: View {
                 }
             }
         }
+        // Trigger session check when the NavigationView appears
+        .onAppear {
+            Task {
+                await checkExistingSession()
+            }
+        }
+    }
+    // Check for existing Openfort session on launch
+    private func checkExistingSession() async {
+        // Avoid showing a spinner over the UI if user is already interacting
+        // but do mark loading while we query the SDK
+        isLoading = true
+        defer { isLoading = false }
+        let retrieveUser = {
+            do {
+                // Try to get the current user/session from Openfort
+                if let _ = try await openfort.getUser() {
+                    // If session exists, jump straight to Home
+                    isSignedIn = true
+                    // Optional: show a small toast
+                    toastMessage = "Welcome back!"
+                    showToast = true
+                }
+            } catch {
+                // If fetching user fails, stay on login screen silently (or show a toast if desired)
+                // toastMessage = "Failed to restore session: \(error.localizedDescription)"
+                // showToast = true
+            }
+        }
+        if openfort.isInitialized {
+            await retrieveUser()
+        } else {
+            openfort.didLoad = {
+                Task {
+                    await retrieveUser()
+                }
+            }
+        }
     }
     
     func signIn() async {
