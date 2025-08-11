@@ -45,40 +45,41 @@ struct SignTypedDataButton: View {
         defer { isLoading = false }
 
         // Set up the domain, types, and message, similar to your React code
-        let domain: [String: Any] = [
-            "name": "Openfort",
-            "version": "0.5",
-            "chainId": 80002,
-            "verifyingContract": "0x9b5AB198e042fCF795E4a0Fa4269764A4E8037D2"
-        ]
-        let types: [String: [[String: String]]] = [
+        let domain = EIP712Domain(
+            name: "Openfort",
+            version: "0.5",
+            chainId: 80002,
+            verifyingContract: "0x9b5AB198e042fCF795E4a0Fa4269764A4E8037D2"
+        )
+        let types: [String: [EIP712TypeField]] = [
             "Mail": [
-                ["name": "from", "type": "Person"],
-                ["name": "to", "type": "Person"],
-                ["name": "content", "type": "string"]
+                EIP712TypeField(name: "from", type: "Person"),
+                EIP712TypeField(name: "to", type: "Person"),
+                EIP712TypeField(name: "content", type: "string")
             ],
             "Person": [
-                ["name": "name", "type": "string"],
-                ["name": "wallet", "type": "address"]
+                EIP712TypeField(name: "name", type: "string"),
+                EIP712TypeField(name: "wallet", type: "address")
             ]
         ]
-        let data: [String: Any] = [
-            "from": [
-                "name": "Alice",
-                "wallet": "0x2111111111111111111111111111111111111111"
-            ],
-            "to": [
-                "name": "Bob",
-                "wallet": "0x3111111111111111111111111111111111111111"
-            ],
-            "content": "Hello!"
-        ]
+        
+        let message = EIP712MailMessage(
+            from: EIP712PersonMessage(
+                name: "Alice",
+                wallet: "0x2111111111111111111111111111111111111111"
+            ),
+            to: EIP712PersonMessage(
+                name: "Bob",
+                wallet: "0x3111111111111111111111111111111111111111"
+            ),
+            content: "Hello!"
+        )
         
         do {
             let params = OFSignTypedDataParams(
-                domain: domain.mapValues { AnyCodable($0) },
-                types: types.mapValues { AnyCodable($0) },
-                message: data.mapValues { AnyCodable($0) }
+                domain: domain,
+                types: types,
+                message: message
             )
 
             let result = try await OFSDK.shared.signTypedData(params: params)
