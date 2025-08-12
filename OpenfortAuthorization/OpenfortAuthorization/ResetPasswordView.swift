@@ -111,17 +111,6 @@ struct ResetPasswordView: View {
             }
             .padding(.top, 20)
             .toast(status: status, setStatus: { status = $0 })
-            .onOpenURL { url in
-                print("Opened from link:", url)
-                
-                if url.host == "reset-password",
-                   let token = URLComponents(url: url, resolvingAgainstBaseURL: false)?
-                                .queryItems?
-                                .first(where: { $0.name == "token" })?.value {
-                    print("Reset token:", token)
-                    // Navigate to reset password screen
-                }
-            }
         }
     }
     

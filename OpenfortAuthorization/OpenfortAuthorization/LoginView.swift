@@ -183,6 +183,7 @@ struct LoginView: View {
         .onAppear {
             Task {
                 await checkExistingSession()
+                await verifyEmail()
             }
         }
     }

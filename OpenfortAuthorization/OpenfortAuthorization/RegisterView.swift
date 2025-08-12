@@ -271,6 +271,9 @@ struct RegisterView: View {
                 UserDefaults.standard.set(state, forKey: "openfort:email_verification_state")
                 isLoading = false
                 emailConfirmation = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    dismiss()
+                }
             }
         }
     }
@@ -311,7 +314,8 @@ struct RegisterView: View {
             if let action = result?.action, action == "verify_email" {
                 _ = try await openfort.requestEmailVerification(params: OFRequestEmailVerificationParams(email: email, redirectUrl: RedirectManager.makeLink(path: "login")?.absoluteString ?? ""))
                 UserDefaults.standard.set(email, forKey: "openfort:email")
-                toast("Email verification sent!")
+                toast("Email verification sent! Check your email.")
+            
                 return
             }
             
