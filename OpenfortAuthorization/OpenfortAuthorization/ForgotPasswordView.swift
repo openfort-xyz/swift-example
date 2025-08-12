@@ -16,6 +16,8 @@ struct ForgotPasswordView: View {
     @State private var toastMessage: String = ""
     @State private var toastType: ForgotPasswordStatusType = .none
     @State private var showToast: Bool = false
+    @State private var showResetPassword = false
+    @State private var resetState: String = ""
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -52,6 +54,20 @@ struct ForgotPasswordView: View {
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .background(Color(.systemGroupedBackground).ignoresSafeArea())
+            .onOpenURL { url in
+                print("Opened from link:", url)
+                
+                if url.host == "reset-password",
+                   let state = URLComponents(url: url, resolvingAgainstBaseURL: false)?
+                                .queryItems?
+                                .first(where: { $0.name == "state" })?.value {
+                    print("State:", state)
+                    resetState = state
+                    showResetPassword = true
+                }
+            }.navigationDestination(isPresented: $showResetPassword) {
+                ResetPasswordView(state: resetState, email: email)
+            }
         }
     }
 
@@ -60,7 +76,6 @@ struct ForgotPasswordView: View {
         guard !email.isEmpty else { return }
         isLoading = true
         showToast = false
-        UserDefaults.standard.set(email, forKey: "openfort:email")
 
         do {
             let redirect = redirectURLString()
@@ -77,7 +92,7 @@ struct ForgotPasswordView: View {
         }
         isLoading = false
     }
-
+    
     private func checkExistingSession() async {
         do {
             if let _ = try await OFSDK.shared.getUser() {
@@ -90,9 +105,7 @@ struct ForgotPasswordView: View {
 
     // MARK: - Helpers
     private func redirectURLString() -> String {
-        let base = OFSDK.shared.config?.iframeUrl ?? "https://embed.openfort.io"
-        let trimmed = base.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-        return "\(trimmed)/reset-password"
+        return RedirectManager.makeLink(path: "reset-password")?.absoluteString ?? ""
     }
 
     private func isValidEmail(_ email: String) -> Bool {

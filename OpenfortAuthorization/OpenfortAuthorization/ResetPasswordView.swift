@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import OpenfortSwift
 
 struct ResetPasswordView: View {
     @State private var password: String = ""
@@ -13,6 +14,10 @@ struct ResetPasswordView: View {
     @State private var isLoading: Bool = false
     @State private var error: String?
     @State private var status: Status?
+    
+    @Environment(\.dismiss) private var dismiss
+    
+    let state: String
     let email: String
     
     enum StatusType {
@@ -106,6 +111,17 @@ struct ResetPasswordView: View {
             }
             .padding(.top, 20)
             .toast(status: status, setStatus: { status = $0 })
+            .onOpenURL { url in
+                print("Opened from link:", url)
+                
+                if url.host == "reset-password",
+                   let token = URLComponents(url: url, resolvingAgainstBaseURL: false)?
+                                .queryItems?
+                                .first(where: { $0.name == "token" })?.value {
+                    print("Reset token:", token)
+                    // Navigate to reset password screen
+                }
+            }
         }
     }
     
@@ -118,11 +134,20 @@ struct ResetPasswordView: View {
             isLoading = false
             return
         }
-        // Simulate network call
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            // Set status accordingly
-            self.status = Status(type: .success)
-            self.isLoading = false
+    
+        Task {
+            defer { isLoading = false }
+            do {
+                let params = OFResetPasswordParams(email: email, password: password, state: state)
+                try await OFSDK.shared.resetPassword(params: params)
+                status = Status(type: .success)
+                // Optionally dismiss after a short delay
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                    dismiss()
+                }
+            } catch {
+                status = Status(type: .error("Failed to reset password. Please try again."))
+            }
         }
     }
     
@@ -166,6 +191,6 @@ extension View {
 
 struct ResetPasswordView_Previews: PreviewProvider {
     static var previews: some View {
-        ResetPasswordView(email: "")
+        ResetPasswordView(state: "", email: "")
     }
 }

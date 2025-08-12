@@ -269,7 +269,7 @@ struct RegisterView: View {
                 _ = try await openfort.initOAuth(
                     params: OFInitOAuthParams(
                         provider: provider,
-                        options: ["redirectTo": AnyCodable((OFSDK.shared.config?.iframeUrl ?? "http://localhost:5173") + "/login")]
+                        options: ["redirectTo": AnyCodable(RedirectManager.makeLink(path: "login")?.absoluteString ?? "")]
                     )
                 )
                 isLoading = false
@@ -297,7 +297,7 @@ struct RegisterView: View {
         do {
             let result = try await openfort.signUpWith(params: OFSignUpWithEmailPasswordParams(email: email, password: password))
             if let action = result?.action, action == "verify_email" {
-                _ = try await openfort.requestEmailVerification(params: OFRequestEmailVerificationParams(email: email, redirectUrl: (OFSDK.shared.config?.iframeUrl ?? "http://localhost:5173") + "/login"))
+                _ = try await openfort.requestEmailVerification(params: OFRequestEmailVerificationParams(email: email, redirectUrl: RedirectManager.makeLink(path: "login")?.absoluteString ?? ""))
                 UserDefaults.standard.set(email, forKey: "openfort:email")
             }
             
