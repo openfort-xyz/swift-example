@@ -260,6 +260,18 @@ struct RegisterView: View {
                         .zIndex(2)
                 }
             }
+        }.onOpenURL { url in
+            print("Opened from link:", url)
+            
+            if url.host == "login",
+               let state = URLComponents(url: url, resolvingAgainstBaseURL: false)?
+                            .queryItems?
+                            .first(where: { $0.name == "state" })?.value {
+                print("State:", state)
+                UserDefaults.standard.set(state, forKey: "openfort:email_verification_state")
+                isLoading = false
+                emailConfirmation = true
+            }
         }
     }
     
@@ -295,10 +307,12 @@ struct RegisterView: View {
         error = nil
         isLoading = true
         do {
-            let result = try await openfort.signUpWith(params: OFSignUpWithEmailPasswordParams(email: email, password: password))
+            let result = try await openfort.signUpWith(params: OFSignUpWithEmailPasswordParams(email: email, password: password, options: OFSignUpWithEmailPasswordOptionsParams(data: ["name": "\(firstName) \(lastName)"])))
             if let action = result?.action, action == "verify_email" {
                 _ = try await openfort.requestEmailVerification(params: OFRequestEmailVerificationParams(email: email, redirectUrl: RedirectManager.makeLink(path: "login")?.absoluteString ?? ""))
                 UserDefaults.standard.set(email, forKey: "openfort:email")
+                toast("Email verification sent!")
+                return
             }
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {

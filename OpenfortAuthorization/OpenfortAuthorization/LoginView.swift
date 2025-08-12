@@ -233,6 +233,24 @@ struct LoginView: View {
         }
     }
     
+    private func verifyEmail() async {
+        if let email = UserDefaults.standard.string(forKey: "openfort:email"), let state = UserDefaults.standard.string(forKey: "openfort:email_verification_state") {
+            do {
+                try await OFSDK.shared.verifyEmail(params: OFVerifyEmailParams(email: email, state: state))
+                isLoading = false
+                toastMessage = "Email verified successfully!"
+                showToast = true
+            } catch {
+                isLoading = false
+                toastMessage = "Email not verified!"
+                showToast = true
+            }
+            
+            UserDefaults.standard.removeObject(forKey: "openfort:email")
+            UserDefaults.standard.removeObject(forKey: "openfort:email_verification_state")
+        }
+    }
+    
     // Check for existing Openfort session on launch
     private func checkExistingSession() async {
         isLoading = true
