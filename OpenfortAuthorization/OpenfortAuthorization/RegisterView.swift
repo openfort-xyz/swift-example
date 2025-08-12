@@ -266,17 +266,15 @@ struct RegisterView: View {
     private func handleSocialAuth(provider: String) {
         Task {
             do {
-                let response = try await openfort.initOAuth(
+                _ = try await openfort.initOAuth(
                     params: OFInitOAuthParams(
                         provider: provider,
-                        options: ["redirectTo": AnyCodable("http://localhost:5173/login")]
+                        options: ["redirectTo": AnyCodable((OFSDK.shared.config?.iframeUrl ?? "http://localhost:5173") + "/login")]
                     )
                 )
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                    isLoading = false
-                    emailConfirmation = true
-                    toast("Successfully signed up with " + provider.capitalized)
-                }
+                isLoading = false
+                emailConfirmation = true
+                toast("Successfully signed up with " + provider.capitalized)
             } catch {
                 toast("Failed to sign in with \(provider.capitalized): \(error)")
             }
@@ -299,8 +297,8 @@ struct RegisterView: View {
         do {
             let result = try await openfort.signUpWith(params: OFSignUpWithEmailPasswordParams(email: email, password: password))
             if let action = result?.action, action == "verify_email" {
-                let verifyEmailResult = try await openfort.requestEmailVerification(params: OFRequestEmailVerificationParams(email: email, redirectUrl: "http://localhost:5173/login"))
-                OFKeychainHelper.save(email, for: "email")
+                _ = try await openfort.requestEmailVerification(params: OFRequestEmailVerificationParams(email: email, redirectUrl: (OFSDK.shared.config?.iframeUrl ?? "http://localhost:5173") + "/login"))
+                UserDefaults.standard.set(email, forKey: "openfort:email")
             }
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {

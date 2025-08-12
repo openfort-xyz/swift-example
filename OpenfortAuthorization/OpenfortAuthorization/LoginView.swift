@@ -20,13 +20,14 @@ struct LoginView: View {
     @State private var showPassword: Bool = false
     @State private var isLoading: Bool = false
     @State private var errorMessage: String?
-    @State private var showResetPassword = false
+    @State private var showForgotPassword = false
     @State private var showSignUp = false
     @State private var showToast: Bool = false
     @State private var toastMessage: String = ""
     @State private var isSignedIn = false
     @State private var showConnectWallet = false
     @StateObject private var homeViewModel = HomeViewModel()
+    
     private let openfort = OFSDK.shared
     
     var body: some View {
@@ -85,7 +86,7 @@ struct LoginView: View {
                                 HStack {
                                     Spacer()
                                     Button("Forgot password?") {
-                                        showResetPassword = true
+                                        showForgotPassword = true
                                     }
                                     .font(.caption)
                                     .foregroundColor(.blue)
@@ -130,32 +131,8 @@ struct LoginView: View {
                             }
                             .padding(.top, 12)
                             
-                            // Divider
-                            HStack {
-                                Rectangle()
-                                    .frame(height: 1)
-                                    .foregroundColor(.gray.opacity(0.3))
-                                Text("Or continue with")
-                                    .font(.caption)
-                                    .foregroundColor(.gray)
-                                    .padding(.horizontal, 4)
-                                Rectangle()
-                                    .frame(height: 1)
-                                    .foregroundColor(.gray.opacity(0.3))
-                            }
-                            .padding(.vertical, 16)
-                            
                             // Social buttons
-                            VStack(spacing: 8) {
-                                HStack(spacing: 8) {
-                                    socialButton("Continue with Google", icon: "globe") { continueWithGoogle() }
-                                    socialButton("Continue with Twitter", icon: "bird") { continueWithTwitter() }
-                                }
-                                HStack(spacing: 8) {
-                                    socialButton("Continue with Facebook", icon: "f.square") { continueWithFacebook() }
-                                    socialButton("Continue with Wallet", icon: "wallet.pass") { continueWithWallet() }
-                                }
-                            }
+                            socialButtonsView
                             
                             HStack {
                                 Text("Don’t have an account?")
@@ -177,26 +154,13 @@ struct LoginView: View {
                         
                         Spacer()
                     }
-                    
-                    // Toast
                     if showToast {
-                        Text(toastMessage)
-                            .padding()
-                            .background(Color.black.opacity(0.8))
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                            .transition(.move(edge: .top))
-                            .onAppear {
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                    withAnimation { showToast = false }
-                                }
-                            }
-                            .zIndex(2)
+                        toastView
                     }
                 }
                 // Modals
-                .sheet(isPresented: $showResetPassword) {
-                    ResetPasswordView(email: email)
+                .sheet(isPresented: $showForgotPassword) {
+                    ForgotPasswordView()
                 }
                 .sheet(isPresented: $showSignUp) {
                     RegisterView()
@@ -216,17 +180,61 @@ struct LoginView: View {
                 }
             }
         }
-        // Trigger session check when the NavigationView appears
         .onAppear {
             Task {
                 await checkExistingSession()
             }
         }
     }
+
+    private var socialButtonsView: some View {
+        Group {
+            HStack {
+                Rectangle()
+                    .frame(height: 1)
+                    .foregroundColor(.gray.opacity(0.3))
+                Text("Or continue with")
+                    .font(.caption)
+                    .foregroundColor(.gray)
+                    .padding(.horizontal, 4)
+                Rectangle()
+                    .frame(height: 1)
+                    .foregroundColor(.gray.opacity(0.3))
+            }
+            .padding(.vertical, 16)
+            
+            VStack(spacing: 8) {
+                HStack(spacing: 8) {
+                    socialButton("Continue with Google", icon: "globe") { continueWithGoogle() }
+                    socialButton("Continue with Twitter", icon: "bird") { continueWithTwitter() }
+                }
+                HStack(spacing: 8) {
+                    socialButton("Continue with Facebook", icon: "f.square") { continueWithFacebook() }
+                    socialButton("Continue with Wallet", icon: "wallet.pass") { continueWithWallet() }
+                }
+            }
+        }
+    }
+    
+    private var toastView: some View {
+        Group {
+            Text(toastMessage)
+                .padding()
+                .background(Color.black.opacity(0.8))
+                .foregroundColor(.white)
+                .cornerRadius(10)
+                .transition(.move(edge: .top))
+                .onAppear {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        withAnimation { showToast = false }
+                    }
+                }
+                .zIndex(2)
+        }
+    }
+    
     // Check for existing Openfort session on launch
     private func checkExistingSession() async {
-        // Avoid showing a spinner over the UI if user is already interacting
-        // but do mark loading while we query the SDK
         isLoading = true
         defer { isLoading = false }
         let retrieveUser = {
@@ -256,7 +264,7 @@ struct LoginView: View {
         }
     }
     
-    func signIn() async {
+    private func signIn() async {
         isLoading = true
         let username = self.email
         let password = self.password
@@ -272,10 +280,10 @@ struct LoginView: View {
         }
     }
     
-    func continueAsGuest() async {
+    private func continueAsGuest() async {
         isLoading = true
         do {
-            let signUpResponse = try await openfort.signUpGuest()
+            _ = try await openfort.signUpGuest()
             isSignedIn = true
             toastMessage = "Signed in as Guest!"
         } catch {
@@ -285,25 +293,24 @@ struct LoginView: View {
         showToast = true
     }
     
-    func continueWithGoogle() {
+    private func continueWithGoogle() {
         isLoading = true
         guard let clientID = FirebaseApp.app()?.options.clientID else {
             toastMessage = "Missing Google client ID"
             showToast = true
             return
         }
+        
         let config = GIDConfiguration(clientID: clientID)
+        
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let rootViewController = windowScene.windows.first?.rootViewController else {
             toastMessage = "Unable to get rootViewController"
             showToast = true
             return
         }
+        
         GIDSignIn.sharedInstance.configuration = config
-        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let rootViewController = windowScene.windows.first?.rootViewController else {
-            return
-        }
         GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController, hint: nil, additionalScopes: nil, completion:{ signInResult, error in
             isLoading = false
             if let error = error {
@@ -331,7 +338,7 @@ struct LoginView: View {
         } )
     }
     
-    func continueWithTwitter() {
+    private func continueWithTwitter() {
         isLoading = true
         let provider = OAuthProvider(providerID: "twitter.com")
         provider.getCredentialWith(nil) { credential, error in
@@ -359,7 +366,7 @@ struct LoginView: View {
         }
     }
     
-    func continueWithFacebook() {
+    private func continueWithFacebook() {
         isLoading = true
         let provider = OAuthProvider(providerID: "facebook.com")
         provider.getCredentialWith(nil) { credential, error in
@@ -388,11 +395,11 @@ struct LoginView: View {
         }
     }
     
-    func continueWithWallet() {
+    private func continueWithWallet() {
         showConnectWallet = true
     }
     
-    func socialButton(_ text: String, icon: String, action: @escaping () -> Void) -> some View {
+    private func socialButton(_ text: String, icon: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack {
                 Image(systemName: icon)
@@ -415,7 +422,7 @@ struct LoginView: View {
         }
         do {
             let token = try await authResult.user.getIDToken()
-            let authResponse = try await openfort.authenticateWithThirdPartyProvider(params: OFAuthenticateWithThirdPartyProviderParams(provider: "firebase", token: token, tokenType: "idToken"))
+            _ = try await openfort.authenticateWithThirdPartyProvider(params: OFAuthenticateWithThirdPartyProviderParams(provider: "firebase", token: token, tokenType: "idToken"))
             isLoading = false
             toastMessage = message
             showToast = true

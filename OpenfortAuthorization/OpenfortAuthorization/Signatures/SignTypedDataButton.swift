@@ -33,7 +33,7 @@ struct SignTypedDataButton: View {
 
             // Link to show the typed message definition
             Link("View typed message",
-                 destination: URL(string: "https://github.com/openfort-xyz/sample-browser-nextjs-embedded-signer/blob/main/src/components/Signatures/SignTypedDataButton.tsx#L25")!)
+                 destination: URL(string: "https://github.com/openfort-xyz/swift-example/blob/088645af2090dcbe1642fac14105eb8e33ace39d/OpenfortAuthorization/OpenfortAuthorization/Signatures/SignTypedDataButton.swift#L85")!)
                 .font(.caption)
                 .foregroundColor(.blue)
         }

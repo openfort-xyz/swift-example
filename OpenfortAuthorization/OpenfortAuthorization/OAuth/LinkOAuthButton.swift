@@ -52,7 +52,7 @@ struct LinkOAuthButton: View {
             // Get access token from Openfort SDK
             let accessToken = try await OFSDK.shared.getAccessToken()
             // Prepare redirect URL
-            let redirectTo = "http://localhost:5173/login" // Replace with your actual redirect URL
+            let redirectTo = (OFSDK.shared.config?.iframeUrl ?? "http://localhost:5173") + "/login"
 
             // Call SDK's link OAuth method
             let response = try await OFSDK.shared.initLinkOAuth(params: OFInitLinkOAuthParams(provider: provider, authToken: accessToken ?? "", options: ["redirectTo": AnyCodable(redirectTo)]))

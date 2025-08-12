@@ -88,11 +88,11 @@ struct ResetPasswordView: View {
                         Text("Already have an account?")
                             .font(.subheadline)
                             .foregroundColor(.gray)
-                        Button("Sign in") {
-                            // Navigate to sign in page
+                        NavigationLink(destination: LoginView()) {
+                            Text("Sign in")
+                                .foregroundColor(.blue)
+                                .font(.subheadline)
                         }
-                        .foregroundColor(.blue)
-                        .font(.subheadline)
                     }
                     .padding(.top, 24)
                 }
