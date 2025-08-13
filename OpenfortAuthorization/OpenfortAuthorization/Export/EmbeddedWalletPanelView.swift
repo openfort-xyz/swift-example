@@ -15,7 +15,16 @@ struct EmbeddedWalletPanelView: View {
             Text("Embedded wallet").font(.headline)
             HStack {
                 Text("Export wallet private key: ").fontWeight(.medium)
-                Button("Export") { handleSetMessage("Exported private key") }
+                Button("Export") {
+                    Task {
+                        do {
+                            _ = try await OFSDK.shared.exportPrivateKey()
+                            handleSetMessage("Exported private key")
+                        } catch {
+                            handleSetMessage("Failed to export private key")
+                        }
+                    }
+                }
             }
             Text("Change wallet recovery:")
             SetWalletRecoveryButton(viewModel: EmbeddedWalletPanelViewModel(), handleSetMessage: handleSetMessage)

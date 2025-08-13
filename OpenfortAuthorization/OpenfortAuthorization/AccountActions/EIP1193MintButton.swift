@@ -7,6 +7,8 @@
 
 import SwiftUI
 import OpenfortSwift
+import Web3
+import Web3ContractABI
 
 struct EIP1193MintButton: View {
     let handleSetMessage: (String) -> Void
@@ -50,26 +52,74 @@ struct EIP1193MintButton: View {
         loading = true
         defer { loading = false }
         do {
-            // --- Your EVM provider logic here ---
-            // Example placeholders:
             do {
-                let provider = try await openfort.getEthereumProvider(params: OFGetEthereumProviderParams())
-                handleSetMessage("Provider: \(provider ?? "empty")")
+                guard let provider = try await openfort.getEthereumProvider(params: OFGetEthereumProviderParams()) else {
+                    return
+                }
+                let web3 = Web3(provider: provider)
+
+                let erc721Address = "0x2522f4fc9af2e1954a3d13f7a5b2683a00a4543a"
+                let contractAddress = try EthereumAddress(hex: erc721Address, eip55: true)
+                let abi: [String: Any] = [
+                    "inputs": [
+                        [
+                            "internalType": "address",
+                            "name": "_to",
+                            "type": "address"
+                        ]
+                    ],
+                    "name": "mint",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                ]
+                guard let contractJsonABI = try? JSONSerialization.data(withJSONObject: [abi], options: [.prettyPrinted]) else {
+                    print("Failed to encode ABI to JSON string")
+                    return
+                }
+                
+                let contract = try web3.eth.Contract(json: contractJsonABI, abiKey: nil, address: contractAddress)
+
+                print(contract.methods.count)
+                let recipient = "0x64452Dff1180b21dc50033e1680bB64CDd492582"
+                // Send some tokens to another address (locally signing the transaction)
+                let myPrivateKey = try EthereumPrivateKey(hexPrivateKey: "...")
+                guard let transaction = contract["transfer"]?(try EthereumAddress(hex: recipient, eip55: true), BigUInt(100000)).createTransaction(
+                    nonce: 0,
+                    gasPrice: EthereumQuantity(quantity: 21.gwei),
+                    maxFeePerGas: nil,
+                    maxPriorityFeePerGas: nil,
+                    gasLimit: 150000,
+                    from: myPrivateKey.address,
+                    value: 0,
+                    accessList: [:],
+                    transactionType: .legacy
+                ) else {
+                    return
+                }
+                let signedTx = try transaction.sign(with: myPrivateKey)
+
+                do {
+                    try web3.eth.sendRawTransaction(transaction: signedTx) { resp in
+                        switch resp.status {
+                            case .success(let data):
+                                let txHash = data.hex() // EthereumData → hex string
+                                print("Transaction sent: \(txHash)")
+                                handleSetMessage("https://amoy.polygonscan.com/tx/\(txHash)")
+                            case .failure(let error):
+                                print("Error sending transaction: \(error)")
+                                handleSetMessage("Failed to send transaction: \(error.localizedDescription)")
+                            }
+                    }
+
+                } catch {
+                    print(error)
+                    handleSetMessage("Failed to send transaction: \(error.localizedDescription)")
+                }
             } catch  {
                 handleSetMessage("Failed to get EVM provider")
                 return
             }
-            
-            // Contract and ABI info
-            let erc721Address = "0x2522f4fc9af2e1954a3d13f7a5b2683a00a4543a"
-            let recipient = "0x64452Dff1180b21dc50033e1680bB64CDd492582"
-            // TODO: Build and send transaction using web3 or your EVM SDK
-            // Simulate/prepare/send the contract call as in your JS code.
-            // If success:
-            let txHash = "0xEXAMPLETXHASH"
-            handleSetMessage("https://amoy.polygonscan.com/tx/\(txHash)")
-            // If error:
-            // handleSetMessage("Failed to send transaction: \(error.localizedDescription)")
         }
     }
 
@@ -80,7 +130,7 @@ struct EIP1193MintButton: View {
             // --- Your EVM provider logic here ---
             do {
                 let provider = try await openfort.getEthereumProvider(params: OFGetEthereumProviderParams())
-                handleSetMessage("Provider: \(provider ?? "empty")")
+//                handleSetMessage("Provider: \(provider ?? "empty")")
             } catch {
                 handleSetMessage("Failed to get EVM provider")
                 return

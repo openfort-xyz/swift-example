@@ -11,6 +11,9 @@
 		B91518CD2E3120F200642529 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = B91518CC2E3120F200642529 /* FirebaseCore */; };
 		B91518D42E3255A800642529 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = B91518D32E3255A800642529 /* FirebaseAuth */; };
 		B915191C2E42424200642529 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = B915191B2E42424200642529 /* GoogleSignInSwift */; };
+		B91519572E4CC47B00642529 /* Web3 in Frameworks */ = {isa = PBXBuildFile; productRef = B91519562E4CC47B00642529 /* Web3 */; };
+		B91519592E4CC68F00642529 /* Web3ContractABI in Frameworks */ = {isa = PBXBuildFile; productRef = B91519582E4CC68F00642529 /* Web3ContractABI */; };
+		B915195B2E4CC69600642529 /* Web3PromiseKit in Frameworks */ = {isa = PBXBuildFile; productRef = B915195A2E4CC69600642529 /* Web3PromiseKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -72,10 +75,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B91519592E4CC68F00642529 /* Web3ContractABI in Frameworks */,
 				B91518CD2E3120F200642529 /* FirebaseCore in Frameworks */,
 				B91518D42E3255A800642529 /* FirebaseAuth in Frameworks */,
 				4C8E5AC82E12CE280083528F /* OpenfortSwift in Frameworks */,
 				B915191C2E42424200642529 /* GoogleSignInSwift in Frameworks */,
+				B915195B2E4CC69600642529 /* Web3PromiseKit in Frameworks */,
+				B91519572E4CC47B00642529 /* Web3 in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -149,6 +155,9 @@
 				B91518CC2E3120F200642529 /* FirebaseCore */,
 				B91518D32E3255A800642529 /* FirebaseAuth */,
 				B915191B2E42424200642529 /* GoogleSignInSwift */,
+				B91519562E4CC47B00642529 /* Web3 */,
+				B91519582E4CC68F00642529 /* Web3ContractABI */,
+				B915195A2E4CC69600642529 /* Web3PromiseKit */,
 			);
 			productName = OpenfortAuthorization;
 			productReference = 4C0AED772E006E9C0059C4D3 /* OpenfortAuthorization.app */;
@@ -236,6 +245,7 @@
 				4C8E5AC62E12CE280083528F /* XCRemoteSwiftPackageReference "swift-sdk" */,
 				B91518C82E3116A600642529 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				B915191A2E42420300642529 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				B91519552E4CC16400642529 /* XCRemoteSwiftPackageReference "Web3.swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4C0AED782E006E9C0059C4D3 /* Products */;
@@ -651,6 +661,14 @@
 				minimumVersion = 9.0.0;
 			};
 		};
+		B91519552E4CC16400642529 /* XCRemoteSwiftPackageReference "Web3.swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Boilertalk/Web3.swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.8.8;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -673,6 +691,21 @@
 			isa = XCSwiftPackageProductDependency;
 			package = B915191A2E42420300642529 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
 			productName = GoogleSignInSwift;
+		};
+		B91519562E4CC47B00642529 /* Web3 */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B91519552E4CC16400642529 /* XCRemoteSwiftPackageReference "Web3.swift" */;
+			productName = Web3;
+		};
+		B91519582E4CC68F00642529 /* Web3ContractABI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B91519552E4CC16400642529 /* XCRemoteSwiftPackageReference "Web3.swift" */;
+			productName = Web3ContractABI;
+		};
+		B915195A2E4CC69600642529 /* Web3PromiseKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B91519552E4CC16400642529 /* XCRemoteSwiftPackageReference "Web3.swift" */;
+			productName = Web3PromiseKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
