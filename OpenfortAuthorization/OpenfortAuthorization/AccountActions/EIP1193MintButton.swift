@@ -130,7 +130,7 @@ struct EIP1193MintButton: View {
             // --- Your EVM provider logic here ---
             do {
                 let provider = try await openfort.getEthereumProvider(params: OFGetEthereumProviderParams())
-//                handleSetMessage("Provider: \(provider ?? "empty")")
+                try await openfort.sendSignatureTransactionIntentRequest(params: OFSendSignatureTransactionIntentRequestParams(transactionIntentId: "", signableHash: ""))
             } catch {
                 handleSetMessage("Failed to get EVM provider")
                 return
