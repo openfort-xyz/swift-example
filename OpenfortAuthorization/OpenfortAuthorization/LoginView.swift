@@ -300,6 +300,7 @@ struct LoginView: View {
     }
     
     private func continueAsGuest() async {
+
         isLoading = true
         do {
             _ = try await openfort.signUpGuest()
