@@ -272,15 +272,7 @@ struct LoginView: View {
                 // showToast = true
             }
         }
-        if openfort.isInitialized {
-            await retrieveUser()
-        } else {
-            openfort.didLoad = {
-                Task {
-                    await retrieveUser()
-                }
-            }
-        }
+        await retrieveUser()
     }
     
     private func signIn() async {

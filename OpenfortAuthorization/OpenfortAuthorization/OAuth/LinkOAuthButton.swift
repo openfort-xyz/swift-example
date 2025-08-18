@@ -52,10 +52,10 @@ struct LinkOAuthButton: View {
             // Get access token from Openfort SDK
             let accessToken = try await OFSDK.shared.getAccessToken()
             // Prepare redirect URL
-            let redirectTo = RedirectManager.makeLink(path: "/login")
+            let redirectTo = RedirectManager.makeLink(path: "login")
 
             // Call SDK's link OAuth method
-            let response = try await OFSDK.shared.initLinkOAuth(params: OFInitLinkOAuthParams(provider: provider, authToken: accessToken ?? "", options: ["redirectTo": AnyCodable(redirectTo)]))
+            let response = try await OFSDK.shared.initLinkOAuth(params: OFInitLinkOAuthParams(provider: provider, authToken: accessToken ?? "", options: ["redirectTo": AnyCodable(redirectTo?.absoluteString)]))
             
             // Open the returned URL (SwiftUI way)
             if let urlString = response?.url, let url = URL(string: urlString) {

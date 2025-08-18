@@ -7,15 +7,18 @@
 
 import SwiftUI
 import OpenfortSwift
+import Web3
+import Web3ContractABI
+import Web3PromiseKit
 
 struct EIP1193CreateSessionButton: View {
     let handleSetMessage: (String) -> Void
     @Binding var sessionKey: String? // 0x-prefixed hex string
     var setSessionKey: (String?) -> Void
-
+    
     var openfort:OFSDK // Your global Openfort state/model
     @State private var loading = false
-
+    
     var body: some View {
         VStack {
             Button(action: {
@@ -36,42 +39,91 @@ struct EIP1193CreateSessionButton: View {
             )
         }
     }
-
+    
     func handleCreateSession() async {
         loading = true
-        defer { loading = false }
+        /*defer { loading = false }
         do {
-            do {
-                let provider = try await openfort.getEthereumProvider(params: OFGetEthereumProviderParams())
-            } catch {
-                handleSetMessage("Failed to get EVM provider")
+            guard let provider = try await openfort.getEthereumProvider(params: OFGetEthereumProviderParams(policy: "", chains: [80001: "https://rpc-amoy.polygon.technology"])) else {
+                handleSetMessage("Failed to get Ethereum provider")
                 return
             }
-            // Generate new private key for session
-            let newPrivateKey = generatePrivateKey() // Implement this in Swift
-            let sessionAddress = privateKeyToAddress(newPrivateKey) // Implement this
+            // 1) Generate the new session keypair
+            let newPrivateKey = generatePrivateKey()
+            let sessionAddress = privateKeyToAddress(newPrivateKey)
 
-            // Set up wallet client, permissions, etc.
-            // -- Place your integration logic here; pseudocode below:
+            // 2) Create a signer from the private key (Boilertalk Web3.swift)
+            let pkNo0x = newPrivateKey.hasPrefix("0x") ? String(newPrivateKey.dropFirst(2)) : newPrivateKey
+            let pkData = Data(hex: pkNo0x)
+                
+            let privateKey = try EthereumPrivateKey(privateKey: pkData)
+            let sessionAddressEth = privateKey.address
 
-            let granted = try await grantSessionKeyPermissions(
-                provider: "provider",
-                sessionAddress: sessionAddress,
-                contract: "0x2522f4fc9af2e1954a3d13f7a5b2683a00a4543a"
+            // 3) Create a Web3 instance using the provider
+            var web3 = Web3(provider: provider)
+
+            // ABI for grantPermissions
+            let grantAbiJson = """
+            [
+              {
+                "inputs": [
+                  {"name": "signer", "type": "address"},
+                  {"name": "expiry", "type": "uint64"},
+                  {"name": "permissions", "type": "bytes"}
+                ],
+                "name": "grantPermissions",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+              }
+            ]
+            """
+
+            // 4) Build the dynamic contract
+            let contract = try web3.eth.Contract(
+                json: Data(grantAbiJson.utf8),
+                abiKey: nil,
+                address: EthereumAddress("0xYourManagerContract")
             )
-            if granted {
-                setSessionKey(newPrivateKey)
-                handleSetMessage("""
-                Session key registered successfully:
-                Address: \(sessionAddress)
-                Private Key: \(newPrivateKey)
-                """)
-            } else {
-                handleSetMessage("Failed to register session")
+
+            // 5) Prepare the function invocation
+            let invocation = contract["grantPermissions"]!(
+                try EthereumAddress(sessionAddress),
+                BigUInt(60 * 60 * 24),
+                Data() // put encoded permissions here
+            )
+
+            // 6) Create a transaction and sign with the session private key
+            firstly {
+                web3.eth.getTransactionCount(address: sessionAddressEth, block: EthereumQuantityTag(tagType: .latest))
+            }.then { nonce -> Promise<BigUInt> in
+                web3.eth.gasPrice().map { quantity in
+                    quantity.quantity
+                }
+            }.then { gasPrice -> Promise<EthereumTransaction> in
+                let tx = try invocation.createTransaction(nonce: nonce, gasPrice: gasPrice, maxFeePerGas: nil, maxPriorityFeePerGas: nil, gasLimit: nil, from: sessionAddressEth, value: BigUInt(0), accessList: <#T##OrderedDictionary<EthereumAddress, [EthereumData]>#>, transactionType: .legacy)
+            }.then { tx -> Promise<EthereumSignedTransaction> in
+                let signed = try tx.sign(with: privateKey, chainId: 80002) // polygonAmoy
+                return .value(signed)
+            }.then { signed -> Promise<Web3Response<EthereumData>> in
+                web3.eth.sendRawTransaction(transaction: signed)
+            }.done { resp in
+                switch resp.status {
+                case .success(let txHash):
+                    setSessionKey(newPrivateKey)
+                    handleSetMessage("""
+                    Session key registered successfully:\nAddress: \(sessionAddress)\nTx: \(txHash.hexString)
+                    """)
+                case .failure(let err):
+                    handleSetMessage("Failed to register session: \(err.localizedDescription)")
+                }
+            }.catch { error in
+                handleSetMessage("Failed to register session: \(error.localizedDescription)")
             }
         } catch {
-            handleSetMessage("Failed to register session: \(error.localizedDescription)")
-        }
+            handleSetMessage(error.localizedDescription)
+            return
+        }*/
     }
 }
 

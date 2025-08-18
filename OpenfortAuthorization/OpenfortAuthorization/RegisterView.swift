@@ -172,11 +172,11 @@ struct RegisterView: View {
                         
                         VStack(spacing: 8) {
                             socialButton("Continue with Google", icon: "globe") {
-                                handleSocialAuth(provider: "google")
+                                handleSocialAuth(provider: .google)
                             }
-                            socialButton("Continue with Twitter", icon: "bird") { handleSocialAuth(provider: "twitter")
+                            socialButton("Continue with Twitter", icon: "bird") { handleSocialAuth(provider: .twitter)
                             }
-                            socialButton("Continue with Facebook", icon: "f.square") { handleSocialAuth(provider: "facebook")
+                            socialButton("Continue with Facebook", icon: "f.square") { handleSocialAuth(provider: .facebook)
                             }
                             socialButton("Continue with Wallet", icon: "wallet.pass") {
                                 showConnectWallet = true
@@ -278,20 +278,20 @@ struct RegisterView: View {
         }
     }
     
-    private func handleSocialAuth(provider: String) {
+    private func handleSocialAuth(provider: OFOAuthProvider) {
         Task {
             do {
                 _ = try await openfort.initOAuth(
                     params: OFInitOAuthParams(
-                        provider: provider,
+                        provider: provider.rawValue,
                         options: ["redirectTo": AnyCodable(RedirectManager.makeLink(path: "login")?.absoluteString ?? "")]
                     )
                 )
                 isLoading = false
                 emailConfirmation = true
-                toast("Successfully signed up with " + provider.capitalized)
+                toast("Successfully signed up with " + provider.rawValue.capitalized)
             } catch {
-                toast("Failed to sign in with \(provider.capitalized): \(error)")
+                toast("Failed to sign in with \(provider.rawValue.capitalized): \(error)")
             }
         }
     }

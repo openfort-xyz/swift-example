@@ -14,5 +14,7 @@
 	<string>3a3ef549-5d4c-4f6d-b5cf-42881c23c2de</string>
 	<key>shieldUrl</key>
 	<string></string>
+	<key>debug</key>
+	<true/>
 </dict>
 </plist>

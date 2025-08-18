@@ -44,7 +44,6 @@ struct SignTypedDataButton: View {
         isLoading = true
         defer { isLoading = false }
 
-        // Set up the domain, types, and message, similar to your React code
         let domain = EIP712Domain(
             name: "Openfort",
             version: "0.5",
@@ -72,7 +71,7 @@ struct SignTypedDataButton: View {
                 name: "Bob",
                 wallet: "0x3111111111111111111111111111111111111111"
             ),
-            content: "Hello!"
+            content: "Hello World!"
         )
         
         do {

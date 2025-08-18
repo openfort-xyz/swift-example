@@ -59,7 +59,7 @@ struct EIP1193MintButton: View {
                 let web3 = Web3(provider: provider)
 
                 let erc721Address = "0x2522f4fc9af2e1954a3d13f7a5b2683a00a4543a"
-                let contractAddress = try EthereumAddress(hex: erc721Address, eip55: true)
+                let contractAddress = try EthereumAddress(hex: erc721Address, eip55: false)
                 let abi: [String: Any] = [
                     "inputs": [
                         [
@@ -82,9 +82,9 @@ struct EIP1193MintButton: View {
 
                 print(contract.methods.count)
                 let recipient = "0x64452Dff1180b21dc50033e1680bB64CDd492582"
-                // Send some tokens to another address (locally signing the transaction)
+
                 let myPrivateKey = try EthereumPrivateKey(hexPrivateKey: "...")
-                guard let transaction = contract["transfer"]?(try EthereumAddress(hex: recipient, eip55: true), BigUInt(100000)).createTransaction(
+                guard let transaction = contract["transfer"]?(try EthereumAddress(hex: recipient, eip55: false), BigUInt(100000)).createTransaction(
                     nonce: 0,
                     gasPrice: EthereumQuantity(quantity: 21.gwei),
                     maxFeePerGas: nil,

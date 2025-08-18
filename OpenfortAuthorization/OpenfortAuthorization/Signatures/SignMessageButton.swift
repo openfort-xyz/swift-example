@@ -36,7 +36,7 @@ struct SignMessageButton: View {
         do {
             isLoading = true
             // Call your SDK, assuming it returns a signature string
-            let result = try await OFSDK.shared.signMessage(params: OFSignMessageParams(message: "Hello World!"))
+            let result = try await OFSDK.shared.signMessage(params: OFSignMessageParams(message: "Hello!"))
             isLoading = false
             // If you have a .data property, adjust as needed
             handleSetMessage(result ?? "Signed!")
