@@ -12,10 +12,9 @@ struct SetWalletRecoveryButton: View {
         case automatic = "automatic"
         case password = "password"
     }
-
-    @ObservedObject var viewModel: EmbeddedWalletPanelViewModel
     let handleSetMessage: (String) -> Void
-
+    
+    @ObservedObject var viewModel: EmbeddedWalletPanelViewModel
     @State private var loading: RecoveryMethod?
     @State private var automaticPassword: String = ""
     @State private var passwordPassword: String = ""

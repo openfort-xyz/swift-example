@@ -46,7 +46,6 @@ struct WalletConnectButtonsSection: View {
         }
     }
 
-    // This is where the SIWE & wallet logic would go!
     func connect(wallet: WalletConnectorInfo) {
         loadingButtonId = wallet.id
         Task {

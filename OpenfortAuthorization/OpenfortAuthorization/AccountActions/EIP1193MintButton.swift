@@ -127,7 +127,6 @@ struct EIP1193MintButton: View {
         loadingBatch = true
         defer { loadingBatch = false }
         do {
-            // --- Your EVM provider logic here ---
             do {
                 let provider = try await openfort.getEthereumProvider(params: OFGetEthereumProviderParams())
                 try await openfort.sendSignatureTransactionIntentRequest(params: OFSendSignatureTransactionIntentRequestParams(transactionIntentId: "", signableHash: ""))

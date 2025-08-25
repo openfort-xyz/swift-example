@@ -14,7 +14,6 @@ struct AccountRecoveryView: View {
     @State private var status: StatusType? = nil
     @FocusState private var focused: Bool
 
-    // Provide your recovery handler here (ViewModel or closure)
     var handleRecovery: (_ method: RecoveryMethod, _ password: String?) async throws -> Void
     
     var body: some View {

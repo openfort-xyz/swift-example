@@ -73,14 +73,13 @@ struct AccountActionsView: View {
             if isProviderEnabled {
                 EIP1193CreateSessionButton(
                     handleSetMessage: handleSetMessage,
-                    sessionKey: $sessionKey, setSessionKey: { sessionKey = $0 }, openfort: OFSDK.shared
+                    setSessionKey: { sessionKey = $0 }, sessionKey: $sessionKey
                 )
             } else {
                 BackendCreateSessionButton(
                     handleSetMessage: handleSetMessage,
                     setSessionKey: { sessionKey = $0 },
-                    sessionKey: sessionKey, openfort: OFSDK.shared
-                )
+                    sessionKey: sessionKey)
             }
         }
         .padding()

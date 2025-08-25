@@ -13,10 +13,10 @@ import Web3PromiseKit
 
 struct EIP1193CreateSessionButton: View {
     let handleSetMessage: (String) -> Void
-    @Binding var sessionKey: String? // 0x-prefixed hex string
     var setSessionKey: (String?) -> Void
+    var openfort = OFSDK.shared
     
-    var openfort:OFSDK // Your global Openfort state/model
+    @Binding var sessionKey: String? // 0x-prefixed hex string
     @State private var loading = false
     
     var body: some View {

@@ -13,7 +13,6 @@ struct LinkOAuthButton: View {
     let user: OFGetUserInstanceResponse?
     @State private var isLoading = false
     
-    // Closure for navigation to url, replace with your navigation logic if needed
     var handleSetMessage: ((String) -> Void)? = nil
 
     var isLinked: Bool {

@@ -10,6 +10,7 @@ import OpenfortSwift
 
 struct EmbeddedWalletPanelView: View {
     let handleSetMessage: (String) -> Void
+    let viewModel = EmbeddedWalletPanelViewModel()
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Embedded wallet").font(.headline)
@@ -18,8 +19,10 @@ struct EmbeddedWalletPanelView: View {
                 Button("Export") {
                     Task {
                         do {
-                            _ = try await OFSDK.shared.exportPrivateKey()
-                            handleSetMessage("Exported private key")
+                            let response = try await viewModel.exportPrivateKey()
+                            if !response.isEmpty {
+                                handleSetMessage("Exported private key: \(response)")
+                            }
                         } catch {
                             handleSetMessage("Failed to export private key")
                         }
@@ -27,7 +30,7 @@ struct EmbeddedWalletPanelView: View {
                 }
             }
             Text("Change wallet recovery:")
-            SetWalletRecoveryButton(viewModel: EmbeddedWalletPanelViewModel(), handleSetMessage: handleSetMessage)
+            SetWalletRecoveryButton(handleSetMessage: handleSetMessage, viewModel: viewModel)
         }
         .padding()
         .background(Color.white)
@@ -38,14 +41,11 @@ struct EmbeddedWalletPanelView: View {
 
 class EmbeddedWalletPanelViewModel: ObservableObject {
     @Published var embeddedState: OFEmbeddedState = .none
-
+    
     func exportPrivateKey() async throws -> String {
-        // Your Openfort SDK export logic here
-        // If SDK throws or returns an error, rethrow it or handle accordingly
-        // Return the exported key as a String
-        return ""
+         try await OFSDK.shared.exportPrivateKey() ?? ""
     }
-
+    
     @MainActor
     func setWalletRecovery(method: String, password: String?) async throws {
         do {

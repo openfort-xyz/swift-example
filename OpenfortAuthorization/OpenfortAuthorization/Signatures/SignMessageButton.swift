@@ -35,13 +35,12 @@ struct SignMessageButton: View {
         guard embeddedState == .ready else { return }
         do {
             isLoading = true
-            // Call your SDK, assuming it returns a signature string
             let result = try await OFSDK.shared.signMessage(params: OFSignMessageParams(message: "Hello!"))
             isLoading = false
-            // If you have a .data property, adjust as needed
             handleSetMessage(result ?? "Signed!")
         } catch {
             isLoading = false
+            handleSetMessage("Failed to sign message:\(error.localizedDescription)")
             print("Failed to sign message:", error)
             // Show your error handling here, like a toast or alert
         }

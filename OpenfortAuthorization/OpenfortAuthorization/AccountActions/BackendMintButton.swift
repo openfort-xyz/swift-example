@@ -69,11 +69,3 @@ struct BackendMintButton: View {
         let userOperationHash: String
     }
 }
-
-// --- Usage ---
-// BackendMintButton(handleSetMessage: { url in print(url) })
-
-// NOTE:
-// - You need to replace `OFSDK.shared.getAccessToken()` and `sendSignatureTransactionIntentRequest`
-//   with your actual Openfort Swift SDK implementation.
-// - The `stateIsReady` flag should be set using your app's embedded state.

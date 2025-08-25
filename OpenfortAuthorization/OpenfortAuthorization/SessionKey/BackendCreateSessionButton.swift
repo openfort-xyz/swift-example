@@ -12,7 +12,7 @@ struct BackendCreateSessionButton: View {
     let handleSetMessage: (String) -> Void
     let setSessionKey: (String?) -> Void
     let sessionKey: String?
-    let openfort: OFSDK // Your app’s state/logic object
+    let openfort = OFSDK.shared // Your app’s state/logic object
 
     @State private var loading: Bool = false
 
