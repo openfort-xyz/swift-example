@@ -53,7 +53,7 @@ struct WalletConnectButtonsSection: View {
                 let address = wallet.type.rawValue
                 let nonce = try await fetchNonce(address: address)
                 let siweMessage = createSIWEMessage(address: address, nonce: nonce, chainId: 80001)
-                let signature = try await signMessage(siweMessage, with: wallet.type)
+                let signature = try await signMessage(siweMessage)
                 try await authenticateOrLink(signature: signature, message: siweMessage, wallet: wallet, link: link)
                 onSuccess()
             } catch {
@@ -102,7 +102,7 @@ func createSIWEMessage(address: String, nonce: String, chainId: Int) -> String {
     SIWEUtils.createSIWEMessage(address: address, nonce: nonce, chainId: chainId)
 }
 
-func signMessage(_ message: String, with wallet: WalletConnector) async throws -> String {
+func signMessage(_ message: String) async throws -> String {
     let result = try await OFSDK.shared.signMessage(params: OFSignMessageParams(message: message))
     return result ?? ""
 }

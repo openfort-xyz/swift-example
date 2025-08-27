@@ -202,9 +202,25 @@ class HomeViewModel: ObservableObject {
             return
         }
         let chainId = 80002
-        let shield = OFShieldAuthenticationDTO(auth: "openfort", token: token, authProvider: "firebase", tokenType: "idToken")
+        
         do {
-            let result = try await OFSDK.shared.configure(params: OFConfigureEmbeddedWalletDTO(chainId: chainId, shieldAuthentication: shield, recoveryParams: OFRecoveryParamsDTO(recoveryMethod: method == .password ? "password" : "automatic", password: password)))
+            if method == .password {
+                let recoveryParams = OFRecoveryParamsDTO.password(password: password ?? "")
+                let result = try await OFSDK.shared.configure(params: OFConfigureEmbeddedWalletDTO(chainId: chainId, recoveryParams: recoveryParams))
+            } else {
+                getEncryptionSession { result in
+                    switch result {
+                    case .success(let session):
+                        Task {
+                            let recoveryParams = OFRecoveryParamsDTO.automatic(encryptionSession: session)
+                            let result = try await OFSDK.shared.configure(params: OFConfigureEmbeddedWalletDTO(chainId: chainId, recoveryParams: recoveryParams))
+                        }
+                        break
+                    case .failure(let error):
+                        self.message = "Error configuring embedded wallet: \(error)\n\n" + self.message
+                    }
+                }
+            }
             self.message = "Embedded wallet configured successfully.\n\n" + self.message
         } catch {
             self.message = "Error configuring embedded wallet: \(error)\n\n" + self.message
@@ -233,8 +249,6 @@ class HomeViewModel: ObservableObject {
         message = "> \(msg)\n\n" + message
     }
 }
-
-
 
 extension View {
     func toast(isPresented: Binding<Bool>, message: String) -> some View {

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import OpenfortSwift
 
 // MARK: - Placeholder types
 enum ConnectWalletStatusType: Identifiable {
@@ -106,38 +107,6 @@ struct ConnectWalletView: View {
         withAnimation {
             self.status = status
         }
-    }
-}
-
-// MARK: - Wallet Button Component
-struct WalletButton: View {
-    let connector: WalletConnector
-    let onSuccess: () -> Void
-    let setStatus: (ConnectWalletStatusType?) -> Void
-
-    var body: some View {
-        Button(action: connectWallet) {
-            HStack {
-                Image(systemName: connector == .metaMask ? "cube.box" : "wallet.pass")
-                Text("Continue with \(connector.rawValue)")
-                    .bold()
-            }
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color.gray.opacity(0.1))
-            .cornerRadius(12)
-        }
-    }
-
-    private func connectWallet() {
-        // TODO: Integrate your wallet SDK here!
-        // For demo, let's simulate a success with delay
-        setStatus(.success("Connected with \(connector.rawValue)!"))
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            setStatus(nil)
-            onSuccess()
-        }
-        // On error: setStatus(.error("Failed to connect to \(connector.rawValue)"))
     }
 }
 

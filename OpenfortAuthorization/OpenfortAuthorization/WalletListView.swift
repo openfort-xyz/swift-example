@@ -18,7 +18,7 @@ public struct WalletWithChainIds: Identifiable, Hashable {
     public let implementationType: String?
     public var chainIds: [Int]
 
-    init(from wallet: EmbeddedAccount) {
+    init(from wallet: OFEmbeddedAccount) {
         self.id = wallet.id
         self.address = wallet.address
         self.accountType = wallet.accountType
@@ -32,13 +32,13 @@ public struct WalletWithChainIds: Identifiable, Hashable {
 
 public protocol EmbeddedWalletService {
     /// Returns the raw list of embedded accounts (possibly multiple entries for the same address on different chains).
-    func list() async throws -> [EmbeddedAccount]
+    func list() async throws -> OFListResponse?
 
     /// Creates an embedded signer/wallet for the given chain.
-    func createEmbeddedSigner(chainId: Int) async throws
+    func createEmbeddedSigner(chainId: Int) async throws -> OFEmbeddedAccount?
 
     /// Recovers/activates a wallet by its server ID for a given chain.
-    func recoverEmbeddedSigner(walletId: String, chainId: Int) async throws
+    func recoverEmbeddedSigner(walletId: String, chainId: Int) async throws -> OFEmbeddedAccount?
 }
 
 // MARK: - ViewModel
@@ -69,7 +69,9 @@ final class WalletListViewModel: ObservableObject {
         defer { isLoading = false; hasLoadedOnce = true }
 
         do {
-            let walletsResponse = try await service.list()
+            guard let walletsResponse = try await service.list() else {
+                return
+            }
             // Filter only SMART_ACCOUNT like in TS
             let smartWallets = walletsResponse.filter { $0.accountType.uppercased() == "SMART_ACCOUNT" }
 
@@ -259,15 +261,15 @@ public struct WalletListView: View {
 }
 
 struct OpenfortEmbeddedService: EmbeddedWalletService {
-    func list() async throws -> [EmbeddedAccount] {
-        try await OFSDK.shared.list() ?? []
+    func list() async throws -> OFListResponse? {
+        try await OFSDK.shared.list()
     }
 
-    func createEmbeddedSigner(chainId: Int) async throws {
-        // try await bridge.createEmbeddedSigner(chainId)
+    func createEmbeddedSigner(chainId: Int) async throws -> OFEmbeddedAccount? {
+        try await OFSDK.shared.create(params: OFEmbeddedAccountCreateParams(accountType: .smartAccount, chainType: .evm, chainId: chainId, recoveryParams: OFRecoveryParamsDTO.automatic(encryptionSession: "")))
     }
 
-    func recoverEmbeddedSigner(walletId: String, chainId: Int) async throws {
-        // try await bridge.recoverEmbeddedSigner(walletId, chainId)
+    func recoverEmbeddedSigner(walletId: String, chainId: Int) async throws -> OFEmbeddedAccount? {
+        try await OFSDK.shared.recover(params: OFEmbeddedAccountRecoverParams(account: walletId, recoveryParams: OFRecoveryParamsDTO.automatic(encryptionSession: "")))
     }
 }

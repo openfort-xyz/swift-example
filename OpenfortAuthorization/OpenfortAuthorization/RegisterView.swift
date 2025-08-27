@@ -312,7 +312,7 @@ struct RegisterView: View {
         do {
             let result = try await openfort.signUpWith(params: OFSignUpWithEmailPasswordParams(email: email, password: password, options: OFSignUpWithEmailPasswordOptionsParams(data: ["name": "\(firstName) \(lastName)"])))
             if let action = result?.action, action == "verify_email" {
-                _ = try await openfort.requestEmailVerification(params: OFRequestEmailVerificationParams(email: email, redirectUrl: RedirectManager.makeLink(path: "login")?.absoluteString ?? ""))
+                try await verifyEmail()
                 UserDefaults.standard.set(email, forKey: "openfort:email")
                 toast("Email verification sent! Check your email.")
             
@@ -329,7 +329,10 @@ struct RegisterView: View {
             toast("Failed to sign up: \(error)")
             return
         }
-        
+    }
+    
+    private func verifyEmail() async throws {
+        try await openfort.requestEmailVerification(params: OFRequestEmailVerificationParams(email: email, redirectUrl: RedirectManager.makeLink(path: "login")?.absoluteString ?? ""))
     }
     
     func checkPassword(_ pw: String) -> Bool {

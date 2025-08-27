@@ -80,7 +80,6 @@ struct ForgotPasswordView: View {
         do {
             let redirect = redirectURLString()
             let params = OFRequestResetPasswordParams(email: email, redirectUrl: redirect)
-            // JS bridge call
             try await OFSDK.shared.requestResetPassword(params: params)
             toastMessage = "Successfully sent email"
             toastType = .success

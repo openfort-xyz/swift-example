@@ -291,6 +291,16 @@ struct LoginView: View {
         }
     }
     
+    private func loginWIthEmailPassword() async {
+        do {
+            let result = try await OFSDK.shared.loginWith(params: OFAuthEmailPasswordParams(email: email, password: password))
+            print(result ?? "Empty response!")
+        } catch {
+            print("Failed to sign in: \(error.localizedDescription)")
+            return
+        }
+    }
+    
     private func continueAsGuest() async {
 
         isLoading = true
