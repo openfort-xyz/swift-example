@@ -12,6 +12,8 @@ import OpenfortSwift
 import FirebaseAuth
 import FirebaseCore
 import GoogleSignIn
+import AuthenticationServices
+import UIKit
 
 struct LoginView: View {
     
@@ -213,6 +215,29 @@ struct LoginView: View {
                     socialButton("Continue with Facebook", icon: "f.square") { continueWithFacebook() }
                     socialButton("Continue with Wallet", icon: "wallet.pass") { continueWithWallet() }
                 }
+                HStack(spacing: 8) {
+                    socialButton("Continue with Apple", icon: "applelogo") { continueWithApple() }
+                }
+            }
+        }
+    }
+    private func continueWithApple() {
+        isLoading = true
+        Task {
+            defer { isLoading = false }
+            do {
+                let anchor = await currentPresentationAnchor()
+                let apple = AppleAuthManager(presentationAnchor: anchor)
+                // Optional local auth gate (uncomment if desired)
+                // _ = try await apple.authenticateWithBiometrics(reason: "Authenticate to continue")
+                let idToken = try await apple.performAppleSignIn()
+                _ = try await OFSDK.shared.loginWithIdToken(params: OFLoginWithIdTokenParams(provider: OFAuthProvider.apple.rawValue, token: idToken))
+                isSignedIn = true
+                toastMessage = "Signed in with Apple!"
+                showToast = true
+            } catch {
+                toastMessage = "Apple Sign-In failed: \(error.localizedDescription)"
+                showToast = true
             }
         }
     }
@@ -467,3 +492,10 @@ struct LoginView: View {
 #Preview {
     LoginView()
 }
+
+    private func currentPresentationAnchor() async -> ASPresentationAnchor {
+        await (UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap { $0.windows }
+            .first { $0.isKeyWindow } ?? UIWindow())
+    }
