@@ -13,6 +13,7 @@ import FirebaseAuth
 import FirebaseCore
 import GoogleSignIn
 import AuthenticationServices
+import CryptoKit
 import UIKit
 
 struct LoginView: View {
@@ -29,6 +30,9 @@ struct LoginView: View {
     @State private var isSignedIn = false
     @State private var showConnectWallet = false
     @StateObject private var homeViewModel = HomeViewModel()
+    
+    @State private var useBiometrics: Bool = false
+    @State private var currentNonce: String?
     
     private let openfort = OFSDK.shared
     
@@ -189,23 +193,26 @@ struct LoginView: View {
             }
         }
     }
-
+    
+    @ViewBuilder
     private var socialButtonsView: some View {
-        Group {
+        VStack(spacing: 8) {
+            // Divider with centered label
             HStack {
                 Rectangle()
                     .frame(height: 1)
-                    .foregroundColor(.gray.opacity(0.3))
+                    .foregroundStyle(Color.gray.opacity(0.3))
                 Text("Or continue with")
                     .font(.caption)
                     .foregroundColor(.gray)
                     .padding(.horizontal, 4)
                 Rectangle()
                     .frame(height: 1)
-                    .foregroundColor(.gray.opacity(0.3))
+                    .foregroundStyle(Color.gray.opacity(0.3))
             }
             .padding(.vertical, 16)
-            
+
+            // Social buttons
             VStack(spacing: 8) {
                 HStack(spacing: 8) {
                     socialButton("Continue with Google", icon: "globe") { continueWithGoogle() }
@@ -215,12 +222,62 @@ struct LoginView: View {
                     socialButton("Continue with Facebook", icon: "f.square") { continueWithFacebook() }
                     socialButton("Continue with Wallet", icon: "wallet.pass") { continueWithWallet() }
                 }
+
+                // Sign in with Apple
                 HStack(spacing: 8) {
-                    socialButton("Continue with Apple", icon: "applelogo") { continueWithApple() }
+                    SignInWithAppleButton(.signIn, onRequest: { request in
+                        let nonce = randomNonceString()
+                        currentNonce = nonce
+                        request.requestedScopes = [.fullName, .email]
+                        request.nonce = sha256(nonce)
+                    }, onCompletion: { result in
+                        switch result {
+                        case .success(let auth):
+                            guard
+                                let credential = auth.credential as? ASAuthorizationAppleIDCredential,
+                                let tokenData = credential.identityToken,
+                                let idToken = String(data: tokenData, encoding: .utf8),
+                                !idToken.isEmpty
+                            else {
+                                toastMessage = "Apple Sign-In: missing ID token"
+                                showToast = true
+                                return
+                            }
+                            Task {
+                                do {
+                                    if useBiometrics {
+                                        let anchor = await currentPresentationAnchor()
+                                        let manager = AppleAuthManager(presentationAnchor: anchor)
+                                        _ = try await manager.authenticateWithBiometrics(reason: "Authenticate to continue")
+                                    }
+                                    _ = try await OFSDK.shared.loginWithIdToken(
+                                        params: OFLoginWithIdTokenParams(provider: OFAuthProvider.apple.rawValue, token: idToken)
+                                    )
+                                    isSignedIn = true
+                                    toastMessage = "Signed in with Apple!"
+                                    showToast = true
+                                } catch {
+                                    toastMessage = "Apple Sign-In failed: \(error.localizedDescription)"
+                                    showToast = true
+                                }
+                            }
+                        case .failure(let error):
+                            toastMessage = "Apple Sign-In failed: \(error.localizedDescription)"
+                            showToast = true
+                        }
+                    })
+                    .signInWithAppleButtonStyle(.black)
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
+
+                Toggle("Require Face ID / Touch ID before signing in", isOn: $useBiometrics)
+                    .font(.footnote)
+                    .tint(.blue)
             }
         }
     }
+    
     private func continueWithApple() {
         isLoading = true
         Task {
@@ -327,7 +384,7 @@ struct LoginView: View {
     }
     
     private func continueAsGuest() async {
-
+        
         isLoading = true
         do {
             _ = try await openfort.signUpGuest()
@@ -493,9 +550,36 @@ struct LoginView: View {
     LoginView()
 }
 
-    private func currentPresentationAnchor() async -> ASPresentationAnchor {
-        await (UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .flatMap { $0.windows }
-            .first { $0.isKeyWindow } ?? UIWindow())
+private func currentPresentationAnchor() async -> ASPresentationAnchor {
+    await (UIApplication.shared.connectedScenes
+        .compactMap { $0 as? UIWindowScene }
+        .flatMap { $0.windows }
+        .first { $0.isKeyWindow } ?? UIWindow())
+}
+
+func randomNonceString(length: Int = 32) -> String {
+    precondition(length > 0)
+    let charset: [Character] = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
+    var result = ""
+    var remaining = length
+    
+    while remaining > 0 {
+        var bytes = [UInt8](repeating: 0, count: 16)
+        let status = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
+        if status != errSecSuccess { fatalError("SecRandomCopyBytes failed: \(status)") }
+        bytes.forEach { b in
+            if remaining == 0 { return }
+            if b < charset.count {
+                result.append(charset[Int(b)])
+                remaining -= 1
+            }
+        }
     }
+    return result
+}
+
+func sha256(_ input: String) -> String {
+    let data = Data(input.utf8)
+    let digest = SHA256.hash(data: data)
+    return digest.map { String(format: "%02x", $0) }.joined()
+}

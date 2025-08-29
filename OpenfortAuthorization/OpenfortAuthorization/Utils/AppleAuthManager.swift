@@ -13,6 +13,7 @@ import UIKit
 
 /// A helper to (optionally) prompt biometrics/passcode and then perform Sign in with Apple.
 /// Call `performAppleSignIn()` to get the Apple ID Token (JWT) as `String`.
+@MainActor
 public final class AppleAuthManager: NSObject {
 
     // MARK: - Init
@@ -72,8 +73,7 @@ public final class AppleAuthManager: NSObject {
         request.nonce = hashedNonce
 
         return try await withCheckedThrowingContinuation { [weak self] (continuation: CheckedContinuation<String, Error>) in
-            guard let self else {
-                continuation.resume(throwing: error("AppleAuthManager deallocated"))
+            guard let self = self else {
                 return
             }
 
@@ -143,6 +143,7 @@ public final class AppleAuthManager: NSObject {
 
 // MARK: - Delegate
 
+@MainActor
 private final class ControllerDelegate: NSObject, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
     private let anchor: ASPresentationAnchor
     private let continuation: CheckedContinuation<String, Error>
