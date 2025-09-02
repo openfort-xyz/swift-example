@@ -12,7 +12,12 @@ import OpenfortSwift
 class AppDelegate: NSObject, UIApplicationDelegate {
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        OFSDK.setupSDK()
+        do {
+            try OFSDK.setupSDK()
+        } catch  {
+            print("Unable to setup Openfort SDK: \(error.localizedDescription)")
+        }
+
         FirebaseApp.configure()
         return true
     }

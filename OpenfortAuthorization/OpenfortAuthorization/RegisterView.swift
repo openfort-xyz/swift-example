@@ -281,12 +281,14 @@ struct RegisterView: View {
     private func handleSocialAuth(provider: OFOAuthProvider) {
         Task {
             do {
-                _ = try await openfort.initOAuth(
+                if let result = try await openfort.initOAuth(
                     params: OFInitOAuthParams(
                         provider: provider.rawValue,
                         options: ["redirectTo": AnyCodable(RedirectManager.makeLink(path: "login")?.absoluteString ?? "")]
                     )
-                )
+                ), let urlString = result.url, let url = URL(string: urlString) {
+                    openURL(url)
+                }
                 isLoading = false
                 emailConfirmation = true
                 toast("Successfully signed up with " + provider.rawValue.capitalized)

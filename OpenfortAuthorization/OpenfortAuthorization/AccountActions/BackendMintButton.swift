@@ -20,7 +20,7 @@ struct BackendMintButton: View {
     @State private var stateIsReady: Bool = true // Set from your environment/model
 
     // MARK: - Helpers (Hex/Data and signing)
-    private func dataFromHex(_ hex: String) -> Data? {
+    private func dataFromHex(_ hex: String) async -> Data? {
         var hexString = hex.lowercased()
         if hexString.hasPrefix("0x") { hexString.removeFirst(2) }
         guard hexString.count % 2 == 0 else { return nil }
