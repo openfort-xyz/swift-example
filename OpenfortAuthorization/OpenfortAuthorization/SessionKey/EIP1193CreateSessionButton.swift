@@ -42,6 +42,37 @@ struct EIP1193CreateSessionButton: View {
     
     func handleCreateSession() async {
         loading = true
+        do {
+            guard let provider = try await openfort.getEthereumProvider(params: OFGetEthereumProviderParams()) else {
+                return
+            }
+            
+            let tx: [String: String] = [
+                "to": "0x4B0897b0513FdBeEc7C469D9aF4fA6C0752aBea7",
+                "from": "0xDeaDbeefdEAdbeefdEadbEEFdeadbeefDEADbEEF",
+                "gas": "0x76c0", // 30400 in hex
+                "value": "0x8ac7230489e80000", // 10 ETH in wei hex
+                "data": "0x",
+                "gasPrice": "0x4a817c800" // 20 gwei
+            ]
+
+            let request = RPCRequest<[ [String: String] ]>(
+                id: 0,
+                jsonrpc: "",
+                method: "eth_sendTransaction",
+                params: [tx]   // array of transaction objects
+            )
+
+            provider.send(request: request) { (resp: Web3Response<String>) in
+                if let chainIdHex: String = resp.result {
+                    let chainIdDec = Int(chainIdHex.dropFirst(2), radix: 16) ?? -1
+                    print("chainId (hex): \(chainIdHex), (dec): \(chainIdDec)")
+                }
+            }
+        } catch {
+            
+        }
+       
         /*defer { loading = false }
         do {
             guard let provider = try await openfort.getEthereumProvider(params: OFGetEthereumProviderParams(policy: "", chains: [80001: "https://rpc-amoy.polygon.technology"])) else {

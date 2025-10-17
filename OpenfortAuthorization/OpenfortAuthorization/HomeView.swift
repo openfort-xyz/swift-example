@@ -205,14 +205,14 @@ class HomeViewModel: ObservableObject {
         
         do {
             if method == .password {
-                let recoveryParams = OFRecoveryParamsDTO.password(password: password ?? "")
+                let recoveryParams = OFRecoveryParamsDTO(recoveryMethod: .password, encryptionSession: nil, password: password, passkeyInfo: nil)
                 let result = try await OFSDK.shared.configure(params: OFConfigureEmbeddedWalletDTO(chainId: chainId, recoveryParams: recoveryParams))
             } else {
                 getEncryptionSession { result in
                     switch result {
                     case .success(let session):
                         Task {
-                            let recoveryParams = OFRecoveryParamsDTO.automatic(encryptionSession: session)
+                            let recoveryParams = OFRecoveryParamsDTO(recoveryMethod: .automatic, encryptionSession: session, password: nil, passkeyInfo: nil)
                             let result = try await OFSDK.shared.configure(params: OFConfigureEmbeddedWalletDTO(chainId: chainId, recoveryParams: recoveryParams))
                         }
                         break

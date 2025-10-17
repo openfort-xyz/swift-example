@@ -266,10 +266,10 @@ struct OpenfortEmbeddedService: EmbeddedWalletService {
     }
 
     func createEmbeddedSigner(chainId: Int) async throws -> OFEmbeddedAccount? {
-        try await OFSDK.shared.create(params: OFEmbeddedAccountCreateParams(accountType: .smartAccount, chainType: .evm, chainId: chainId, recoveryParams: OFRecoveryParamsDTO.automatic(encryptionSession: "")))
+        try await OFSDK.shared.create(params: OFEmbeddedAccountCreateParams(accountType: .smartAccount, chainType: .evm, chainId: chainId, recoveryParams: OFRecoveryParamsDTO(recoveryMethod: .automatic, encryptionSession: nil, password: nil, passkeyInfo: nil)))
     }
 
     func recoverEmbeddedSigner(walletId: String, chainId: Int) async throws -> OFEmbeddedAccount? {
-        try await OFSDK.shared.recover(params: OFEmbeddedAccountRecoverParams(account: walletId, recoveryParams: OFRecoveryParamsDTO.automatic(encryptionSession: "")))
+        try await OFSDK.shared.recover(params: OFEmbeddedAccountRecoverParams(account: walletId, recoveryParams: OFRecoveryParamsDTO(recoveryMethod: .automatic, encryptionSession: nil, password: nil, passkeyInfo: nil)))
     }
 }
