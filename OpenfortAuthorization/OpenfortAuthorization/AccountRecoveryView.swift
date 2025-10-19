@@ -36,13 +36,23 @@ struct AccountRecoveryView: View {
                     Task {
                         loadingPwd = true
                         do {
+                            print("[AccountRecovery] Starting password recovery with password: \(password.isEmpty ? "<empty>" : "<provided>")")
                             try await handleRecovery(.password, password)
+                            print("[AccountRecovery] Password recovery succeeded!")
+                            status = .success("Recovery configured successfully!")
                         } catch let error as MissingRecoveryPasswordError {
                             status = .error("Missing recovery password")
                         } catch let error as WrongRecoveryPasswordError {
                             status = .error("Wrong recovery password")
                         } catch {
-                            status = .error("Unknown error")
+                            print("[AccountRecovery] Error details: \(error)")
+                            print("[AccountRecovery] Error localized: \(error.localizedDescription)")
+                            if let nsError = error as NSError? {
+                                print("[AccountRecovery] Error domain: \(nsError.domain)")
+                                print("[AccountRecovery] Error code: \(nsError.code)")
+                                print("[AccountRecovery] Error userInfo: \(nsError.userInfo)")
+                            }
+                            status = .error("Error: \(error.localizedDescription)")
                         }
                         loadingPwd = false
                     }
@@ -73,13 +83,23 @@ struct AccountRecoveryView: View {
                     Task {
                         loadingAut = true
                         do {
+                            print("[AccountRecovery] Starting automatic recovery...")
                             try await handleRecovery(.automatic, nil)
+                            print("[AccountRecovery] Automatic recovery succeeded!")
+                            status = .success("Recovery configured successfully!")
                         } catch let error as MissingRecoveryPasswordError {
                             status = .error("Missing recovery password")
                         } catch let error as WrongRecoveryPasswordError {
                             status = .error("Wrong recovery password")
                         } catch {
-                            status = .error("Unknown error")
+                            print("[AccountRecovery] Error details: \(error)")
+                            print("[AccountRecovery] Error localized: \(error.localizedDescription)")
+                            if let nsError = error as NSError? {
+                                print("[AccountRecovery] Error domain: \(nsError.domain)")
+                                print("[AccountRecovery] Error code: \(nsError.code)")
+                                print("[AccountRecovery] Error userInfo: \(nsError.userInfo)")
+                            }
+                            status = .error("Error: \(error.localizedDescription)")
                         }
                         loadingAut = false
                     }
