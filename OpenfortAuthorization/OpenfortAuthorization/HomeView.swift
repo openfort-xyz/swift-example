@@ -8,7 +8,6 @@
 import SwiftUI
 import OpenfortSwift
 import Combine
-import FirebaseAuth
 
 struct HomeView: View {
     @ObservedObject var viewModel: HomeViewModel

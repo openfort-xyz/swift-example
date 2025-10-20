@@ -8,8 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		4C8E5AC82E12CE280083528F /* OpenfortSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 4C8E5AC72E12CE280083528F /* OpenfortSwift */; };
-		B91518CD2E3120F200642529 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = B91518CC2E3120F200642529 /* FirebaseCore */; };
-		B91518D42E3255A800642529 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = B91518D32E3255A800642529 /* FirebaseAuth */; };
 		B915191C2E42424200642529 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = B915191B2E42424200642529 /* GoogleSignInSwift */; };
 		B91519572E4CC47B00642529 /* Web3 in Frameworks */ = {isa = PBXBuildFile; productRef = B91519562E4CC47B00642529 /* Web3 */; };
 		B91519592E4CC68F00642529 /* Web3ContractABI in Frameworks */ = {isa = PBXBuildFile; productRef = B91519582E4CC68F00642529 /* Web3ContractABI */; };
@@ -76,8 +74,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				B91519592E4CC68F00642529 /* Web3ContractABI in Frameworks */,
-				B91518CD2E3120F200642529 /* FirebaseCore in Frameworks */,
-				B91518D42E3255A800642529 /* FirebaseAuth in Frameworks */,
 				4C8E5AC82E12CE280083528F /* OpenfortSwift in Frameworks */,
 				B915191C2E42424200642529 /* GoogleSignInSwift in Frameworks */,
 				B915195B2E4CC69600642529 /* Web3PromiseKit in Frameworks */,
@@ -152,8 +148,6 @@
 			name = OpenfortAuthorization;
 			packageProductDependencies = (
 				4C8E5AC72E12CE280083528F /* OpenfortSwift */,
-				B91518CC2E3120F200642529 /* FirebaseCore */,
-				B91518D32E3255A800642529 /* FirebaseAuth */,
 				B915191B2E42424200642529 /* GoogleSignInSwift */,
 				B91519562E4CC47B00642529 /* Web3 */,
 				B91519582E4CC68F00642529 /* Web3ContractABI */,
@@ -243,7 +237,6 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				4C8E5AC62E12CE280083528F /* XCRemoteSwiftPackageReference "swift-sdk" */,
-				B91518C82E3116A600642529 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				B915191A2E42420300642529 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				B91519552E4CC16400642529 /* XCRemoteSwiftPackageReference "Web3.swift" */,
 			);
@@ -645,14 +638,6 @@
 				kind = branch;
 			};
 		};
-		B91518C82E3116A600642529 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 12.0.0;
-			};
-		};
 		B915191A2E42420300642529 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
@@ -676,16 +661,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4C8E5AC62E12CE280083528F /* XCRemoteSwiftPackageReference "swift-sdk" */;
 			productName = OpenfortSwift;
-		};
-		B91518CC2E3120F200642529 /* FirebaseCore */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = B91518C82E3116A600642529 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseCore;
-		};
-		B91518D32E3255A800642529 /* FirebaseAuth */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = B91518C82E3116A600642529 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseAuth;
 		};
 		B915191B2E42424200642529 /* GoogleSignInSwift */ = {
 			isa = XCSwiftPackageProductDependency;

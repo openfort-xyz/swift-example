@@ -9,8 +9,6 @@ import SwiftUI
 import JavaScriptCore
 import WebKit
 import OpenfortSwift
-import FirebaseAuth
-import FirebaseCore
 import GoogleSignIn
 import AuthenticationServices
 import CryptoKit
@@ -404,22 +402,16 @@ struct LoginView: View {
         let password = self.password
         
         do {
-            let result = try await Auth.auth().signIn(withEmail: username, password: password)
-            await authoriseToOpenfortWith(result, message: "Signed in!")
+            let result = try await OFSDK.shared.loginWith(params: OFAuthEmailPasswordParams(email: username, password: password))
+            print(result ?? "Empty response!")
+            isLoading = false
+            toastMessage = "Signed in!"
+            showToast = true
+            isSignedIn = true
         } catch {
             toastMessage = "Failed to sign in: \(error.localizedDescription)"
             isLoading = false
             showToast = true
-            return
-        }
-    }
-    
-    private func loginWIthEmailPassword() async {
-        do {
-            let result = try await OFSDK.shared.loginWith(params: OFAuthEmailPasswordParams(email: email, password: password))
-            print(result ?? "Empty response!")
-        } catch {
-            print("Failed to sign in: \(error.localizedDescription)")
             return
         }
     }
@@ -492,24 +484,6 @@ struct LoginView: View {
         .foregroundColor(.blue)
         .cornerRadius(8)
         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.blue, lineWidth: 1))
-    }
-    
-    private func authoriseToOpenfortWith(_ result: AuthDataResult?, message: String) async {
-
-        guard let authResult = result else {
-            fatalError("Unexpected nil authResult")
-        }
-
-        // Firebase auth is now configured in AppDelegate, so we just need to verify the user is authenticated
-        // The SDK will automatically use Firebase auth when needed via the getAccessToken closure
-        isLoading = false
-        toastMessage = message
-        showToast = true
-        isSignedIn = true
-    }
-    
-    private var contentUrl: URL {
-        Bundle.main.url(forResource: "index", withExtension: "html")!
     }
 }
 
