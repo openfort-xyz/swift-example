@@ -24,7 +24,7 @@ struct HomeView: View {
                             VStack(spacing: 18) {
                                 Text("Set up your embedded signer")
                                     .font(.title2).bold()
-                                Text("Welcome, \(viewModel.user?.displayName ?? viewModel.user?.id ?? "User")!")
+                                Text("Welcome, \(viewModel.user?.player?.name ?? viewModel.user?.id ?? "User")!")
                                     .foregroundColor(.gray)
                                 // Logout
                                 HStack {
@@ -190,42 +190,59 @@ struct SidebarIntroView: View {
 @MainActor
 class HomeViewModel: ObservableObject {
     @Published var state: OFEmbeddedState = .none
-    @Published var user: UserModel?
+    @Published var user: OFGetUserInstanceResponse?
     @Published var message: String = ""
     var onLogout: (() -> Void)?
     
     private var cancellable: AnyCancellable?
     
     lazy var handleRecovery: (_ method: RecoveryMethod, _ password: String?) async throws -> Void = { method, password in
-        guard let token = try await Auth.auth().currentUser?.getIDToken() else {
-            self.message = "Error fetching ID token.\n\n" + self.message
-            return
-        }
+        print("[HomeViewModel] handleRecovery called with method: \(method)")
+
         let chainId = 80002
-        
+
         do {
             if method == .password {
+                print("[HomeViewModel] Using password recovery method")
+                print("[HomeViewModel] Password provided: \(password != nil ? "YES" : "NO")")
+                print("[HomeViewModel] Password empty: \(password?.isEmpty ?? true ? "YES" : "NO")")
+
                 let recoveryParams = OFRecoveryParamsDTO(recoveryMethod: .password, encryptionSession: nil, password: password, passkeyInfo: nil)
+                print("[HomeViewModel] Calling OFSDK.shared.configure...")
                 let result = try await OFSDK.shared.configure(params: OFConfigureEmbeddedWalletDTO(chainId: chainId, recoveryParams: recoveryParams))
+                print("[HomeViewModel] Configure succeeded! Result: \(String(describing: result))")
+                self.message = "Embedded wallet configured successfully with password recovery.\n\n" + self.message
             } else {
-                getEncryptionSession { result in
-                    switch result {
-                    case .success(let session):
-                        Task {
-                            let recoveryParams = OFRecoveryParamsDTO(recoveryMethod: .automatic, encryptionSession: session, password: nil, passkeyInfo: nil)
-                            let result = try await OFSDK.shared.configure(params: OFConfigureEmbeddedWalletDTO(chainId: chainId, recoveryParams: recoveryParams))
-                        }
-                        break
-                    case .failure(let error):
-                        self.message = "Error configuring embedded wallet: \(error)\n\n" + self.message
+                print("[HomeViewModel] Using automatic recovery method")
+                // For automatic recovery, we need to fetch the encryption session first
+                print("[HomeViewModel] Fetching encryption session...")
+                let session = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<String, Error>) in
+                    getEncryptionSession { result in
+                        print("[HomeViewModel] Encryption session result: \(result)")
+                        continuation.resume(with: result)
                     }
                 }
+                print("[HomeViewModel] Got encryption session: \(session.prefix(20))...")
+
+                let recoveryParams = OFRecoveryParamsDTO(recoveryMethod: .automatic, encryptionSession: session, password: nil, passkeyInfo: nil)
+                print("[HomeViewModel] Calling OFSDK.shared.configure...")
+                let result = try await OFSDK.shared.configure(params: OFConfigureEmbeddedWalletDTO(chainId: chainId, recoveryParams: recoveryParams))
+                print("[HomeViewModel] Configure succeeded! Result: \(String(describing: result))")
+                self.message = "Embedded wallet configured successfully with automatic recovery.\n\n" + self.message
             }
-            self.message = "Embedded wallet configured successfully.\n\n" + self.message
         } catch {
-            self.message = "Error configuring embedded wallet: \(error)\n\n" + self.message
+            print("[HomeViewModel] Error caught: \(error)")
+            print("[HomeViewModel] Error type: \(type(of: error))")
+            print("[HomeViewModel] Error localized: \(error.localizedDescription)")
+            if let nsError = error as NSError? {
+                print("[HomeViewModel] NSError domain: \(nsError.domain)")
+                print("[HomeViewModel] NSError code: \(nsError.code)")
+                print("[HomeViewModel] NSError userInfo: \(nsError.userInfo)")
+            }
+            self.message = "Error configuring embedded wallet: \(error.localizedDescription)\n\n" + self.message
+            throw error
         }
-        
+
     }
     
     init() {
@@ -233,6 +250,19 @@ class HomeViewModel: ObservableObject {
             .replaceNil(with: .none)
             .receive(on: DispatchQueue.main)
             .assign(to: \.state, on: self)
+
+        // Load user data on initialization
+        Task {
+            await loadUser()
+        }
+    }
+
+    func loadUser() async {
+        do {
+            user = try await OFSDK.shared.getUser()
+        } catch {
+            message = "Error loading user: \(error)\n\n" + message
+        }
     }
     
     func logout() async {

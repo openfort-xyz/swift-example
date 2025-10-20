@@ -313,18 +313,21 @@ struct RegisterView: View {
         isLoading = true
         do {
             let result = try await openfort.signUpWith(params: OFSignUpWithEmailPasswordParams(email: email, password: password, options: OFSignUpWithEmailPasswordOptionsParams(data: ["name": "\(firstName) \(lastName)"])))
+
+            // Check if email verification is required
             if let action = result?.action, action == "verify_email" {
                 try await verifyEmail()
                 UserDefaults.standard.set(email, forKey: "openfort:email")
+                isLoading = false
                 toast("Email verification sent! Check your email.")
-            
                 return
             }
-            
+
+            // Sign up successful
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                 isLoading = false
                 emailConfirmation = true
-                toast("Successfully signed up! Check your email.")
+                toast("Successfully signed up!")
             }
         } catch  {
             isLoading = false

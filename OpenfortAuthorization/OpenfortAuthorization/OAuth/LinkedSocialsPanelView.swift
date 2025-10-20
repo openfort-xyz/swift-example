@@ -9,7 +9,7 @@ import SwiftUI
 import OpenfortSwift
 
 struct LinkedSocialsPanelView: View {
-    let user: UserModel?
+    let user: OFGetUserInstanceResponse?
     let handleSetMessage: (String) -> Void
     @State var userResponse: OFGetUserInstanceResponse?
     
@@ -37,9 +37,4 @@ struct LinkedSocialsPanelView: View {
         .cornerRadius(12)
         .shadow(radius: 4)
     }
-}
-
-struct UserModel {
-    var id: String
-    var displayName: String?
 }

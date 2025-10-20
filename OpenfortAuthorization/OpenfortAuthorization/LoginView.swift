@@ -495,26 +495,17 @@ struct LoginView: View {
     }
     
     private func authoriseToOpenfortWith(_ result: AuthDataResult?, message: String) async {
-        
+
         guard let authResult = result else {
             fatalError("Unexpected nil authResult")
         }
-        do {
-            try OFSDK.setupSDK(thirdParty: .firebase) {
-                    try await authResult.user.getIDToken()
-            }
-            isLoading = false
-            toastMessage = message
-            showToast = true
-            isSignedIn = true
-            
-        } catch {
-            isLoading = false
-            toastMessage = "Openfort Auth failed: \(error.localizedDescription)"
-            showToast = true
-            return
-        }
-        
+
+        // Firebase auth is now configured in AppDelegate, so we just need to verify the user is authenticated
+        // The SDK will automatically use Firebase auth when needed via the getAccessToken closure
+        isLoading = false
+        toastMessage = message
+        showToast = true
+        isSignedIn = true
     }
     
     private var contentUrl: URL {
