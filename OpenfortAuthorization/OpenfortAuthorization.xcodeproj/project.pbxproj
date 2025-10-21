@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		4C8E5AC82E12CE280083528F /* OpenfortSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 4C8E5AC72E12CE280083528F /* OpenfortSwift */; };
-		B915191C2E42424200642529 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = B915191B2E42424200642529 /* GoogleSignInSwift */; };
 		B91519572E4CC47B00642529 /* Web3 in Frameworks */ = {isa = PBXBuildFile; productRef = B91519562E4CC47B00642529 /* Web3 */; };
 		B91519592E4CC68F00642529 /* Web3ContractABI in Frameworks */ = {isa = PBXBuildFile; productRef = B91519582E4CC68F00642529 /* Web3ContractABI */; };
 		B915195B2E4CC69600642529 /* Web3PromiseKit in Frameworks */ = {isa = PBXBuildFile; productRef = B915195A2E4CC69600642529 /* Web3PromiseKit */; };
@@ -75,7 +74,6 @@
 			files = (
 				B91519592E4CC68F00642529 /* Web3ContractABI in Frameworks */,
 				4C8E5AC82E12CE280083528F /* OpenfortSwift in Frameworks */,
-				B915191C2E42424200642529 /* GoogleSignInSwift in Frameworks */,
 				B915195B2E4CC69600642529 /* Web3PromiseKit in Frameworks */,
 				B91519572E4CC47B00642529 /* Web3 in Frameworks */,
 			);
@@ -148,7 +146,6 @@
 			name = OpenfortAuthorization;
 			packageProductDependencies = (
 				4C8E5AC72E12CE280083528F /* OpenfortSwift */,
-				B915191B2E42424200642529 /* GoogleSignInSwift */,
 				B91519562E4CC47B00642529 /* Web3 */,
 				B91519582E4CC68F00642529 /* Web3ContractABI */,
 				B915195A2E4CC69600642529 /* Web3PromiseKit */,
@@ -237,7 +234,6 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				4C8E5AC62E12CE280083528F /* XCRemoteSwiftPackageReference "swift-sdk" */,
-				B915191A2E42420300642529 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				B91519552E4CC16400642529 /* XCRemoteSwiftPackageReference "Web3.swift" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -638,14 +634,6 @@
 				kind = branch;
 			};
 		};
-		B915191A2E42420300642529 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 9.0.0;
-			};
-		};
 		B91519552E4CC16400642529 /* XCRemoteSwiftPackageReference "Web3.swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Boilertalk/Web3.swift.git";
@@ -661,11 +649,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4C8E5AC62E12CE280083528F /* XCRemoteSwiftPackageReference "swift-sdk" */;
 			productName = OpenfortSwift;
-		};
-		B915191B2E42424200642529 /* GoogleSignInSwift */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = B915191A2E42420300642529 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
-			productName = GoogleSignInSwift;
 		};
 		B91519562E4CC47B00642529 /* Web3 */ = {
 			isa = XCSwiftPackageProductDependency;

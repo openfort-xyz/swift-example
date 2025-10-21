@@ -9,7 +9,6 @@ import SwiftUI
 import JavaScriptCore
 import WebKit
 import OpenfortSwift
-import GoogleSignIn
 import AuthenticationServices
 import CryptoKit
 import UIKit
