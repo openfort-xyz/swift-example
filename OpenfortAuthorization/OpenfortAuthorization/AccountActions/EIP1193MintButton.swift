@@ -83,7 +83,7 @@ struct EIP1193MintButton: View {
                 print(contract.methods.count)
                 let recipient = "0x64452Dff1180b21dc50033e1680bB64CDd492582"
 
-                let myPrivateKey = try EthereumPrivateKey(hexPrivateKey: "...")
+                let myPrivateKey = try EthereumPrivateKey(hexPrivateKey: "afdfd9c3d2095ef696594f6cedcae59e72dcd697e2a7521b1578140422a4f890")
                 guard let transaction = contract["transfer"]?(try EthereumAddress(hex: recipient, eip55: false), BigUInt(100000)).createTransaction(
                     nonce: 0,
                     gasPrice: EthereumQuantity(quantity: 21.gwei),
