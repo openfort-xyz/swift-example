@@ -30,9 +30,6 @@ struct SignaturesPanelView: View {
                 }, embeddedState: embeddedState)
             }
         }
-        .padding()
-        .background(Color.white)
-        .cornerRadius(12)
-        .shadow(radius: 4)
+        .cardStyle()
     }
 }

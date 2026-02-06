@@ -10,7 +10,7 @@ import OpenfortSwift
 
 struct SignTypedDataButton: View {
     let handleSetMessage: (String) -> Void
-    @State var embeddedState: OFEmbeddedState
+    let embeddedState: OFEmbeddedState
 
     @State private var isLoading = false
 
@@ -33,7 +33,7 @@ struct SignTypedDataButton: View {
 
             // Link to show the typed message definition
             Link("View typed message",
-                 destination: URL(string: "https://github.com/openfort-xyz/swift-example/blob/088645af2090dcbe1642fac14105eb8e33ace39d/OpenfortAuthorization/OpenfortAuthorization/Signatures/SignTypedDataButton.swift#L85")!)
+                 destination: URL(string: "https://github.com/openfort-xyz/swift-example/blob/main/OpenfortAuthorization/OpenfortAuthorization/Signatures/SignTypedDataButton.swift")!)
                 .font(.caption)
                 .foregroundColor(.blue)
         }

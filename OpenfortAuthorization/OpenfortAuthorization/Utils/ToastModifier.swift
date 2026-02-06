@@ -97,6 +97,7 @@ private struct ToastModifier: ViewModifier {
                             .imageScale(.large)
                             .foregroundColor(.white.opacity(0.7))
                     }
+                    .accessibilityLabel("Dismiss")
                 }
 
                 ScrollView {
@@ -123,7 +124,7 @@ private struct ToastModifier: ViewModifier {
             .padding(20)
             .background(backgroundColor(for: toast.style))
             .foregroundColor(.white)
-            .cornerRadius(16)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
             .padding(.horizontal, 24)
         }
         .transition(.opacity)

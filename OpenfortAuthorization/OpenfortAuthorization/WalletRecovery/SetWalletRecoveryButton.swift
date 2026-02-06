@@ -24,8 +24,8 @@ struct SetWalletRecoveryButton: View {
             // Automatic Recovery
             TextField("Old password recovery", text: $automaticPassword)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
-                .autocapitalization(.none)
-                .disableAutocorrection(true)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
 
             Button(action: {
                 Task {
@@ -52,8 +52,8 @@ struct SetWalletRecoveryButton: View {
             // Password Recovery
             TextField("New password recovery", text: $passwordPassword)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
-                .autocapitalization(.none)
-                .disableAutocorrection(true)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
 
             Button(action: {
                 Task {

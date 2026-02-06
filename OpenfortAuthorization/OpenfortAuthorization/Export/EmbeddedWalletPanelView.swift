@@ -32,43 +32,6 @@ struct EmbeddedWalletPanelView: View {
             Text("Change wallet recovery:")
             SetWalletRecoveryButton(handleSetMessage: handleSetMessage, viewModel: viewModel)
         }
-        .padding()
-        .background(Color.white)
-        .cornerRadius(12)
-        .shadow(radius: 4)
-    }
-}
-
-class EmbeddedWalletPanelViewModel: ObservableObject {
-    @Published var embeddedState: OFEmbeddedState = .none
-    @Published var embeddedAccount: OFEmbeddedAccount?
-    
-    init(embeddedState: OFEmbeddedState, embeddedAccount: OFEmbeddedAccount?) {
-        self.embeddedState = embeddedState
-        self.embeddedAccount = embeddedAccount
-    }
-    
-    func exportPrivateKey() async throws -> String {
-         try await OFSDK.shared.exportPrivateKey() ?? ""
-    }
-    
-    @MainActor
-    func setWalletRecovery(method: String, password: String?) async throws {
-        do {
-            let session = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<String, Error>) in
-                getEncryptionSession { result in
-                    print("[HomeViewModel] Encryption session result: \(result)")
-                    continuation.resume(with: result)
-                }
-            }
-            if embeddedAccount?.recoveryMethod == .password {
-                try await OFSDK.shared.setRecoveryMethod(params: OFSetRecoveryMethodParams(previousRecovery: OFRecoveryParamsDTO(recoveryMethod: .password, password: password),  newRecovery: OFRecoveryParamsDTO(recoveryMethod: .automatic, encryptionSession: session)))
-            } else {
-                try await OFSDK.shared.setRecoveryMethod(params: OFSetRecoveryMethodParams(previousRecovery: OFRecoveryParamsDTO(recoveryMethod: .automatic, encryptionSession: session), newRecovery: OFRecoveryParamsDTO(recoveryMethod: .password, password: password)))
-            }
-            
-        } catch {
-            throw error
-        }
+        .cardStyle()
     }
 }

@@ -103,6 +103,15 @@ public final class AppleAuthManager: NSObject {
         }
     }
 
+    // MARK: - Static Helpers
+
+    static func currentPresentationAnchor() async -> ASPresentationAnchor {
+        await (UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap { $0.windows }
+            .first { $0.isKeyWindow } ?? UIWindow())
+    }
+
     // MARK: - Private
 
     private var delegateProxy: ControllerDelegate?

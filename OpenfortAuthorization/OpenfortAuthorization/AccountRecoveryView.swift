@@ -18,7 +18,7 @@ struct AccountRecoveryView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("Account recovery")
+            Text("Set up your embedded wallet")
                 .font(.title2)
                 .bold()
                 .padding(.bottom, 16)
@@ -93,9 +93,6 @@ struct AccountRecoveryView: View {
             .padding(.top, 8)
         }
         .padding()
-        .background(Color.white)
-        .cornerRadius(12)
-        .shadow(radius: 4)
         .toast($toast)
     }
 }

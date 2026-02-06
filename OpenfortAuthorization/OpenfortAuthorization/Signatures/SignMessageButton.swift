@@ -10,7 +10,7 @@ import OpenfortSwift
 
 struct SignMessageButton: View {
     let handleSetMessage: (String) -> Void
-    @State var embeddedState: OFEmbeddedState 
+    let embeddedState: OFEmbeddedState
 
     @State private var isLoading = false
 

@@ -5,6 +5,46 @@
 
 import SwiftUI
 
+// MARK: - Card Style
+
+struct CardStyle: ViewModifier {
+    var shadowRadius: CGFloat = 4
+
+    func body(content: Content) -> some View {
+        content
+            .padding()
+            .background(Color.white)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .shadow(radius: shadowRadius)
+    }
+}
+
+extension View {
+    func cardStyle(shadowRadius: CGFloat = 4) -> some View {
+        modifier(CardStyle(shadowRadius: shadowRadius))
+    }
+}
+
+// MARK: - Styled Text Field
+
+struct StyledTextFieldModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+            )
+    }
+}
+
+extension View {
+    func styledTextField() -> some View {
+        modifier(StyledTextFieldModifier())
+    }
+}
+
 // MARK: - Social Button
 
 struct SocialButton: View {
@@ -24,8 +64,9 @@ struct SocialButton: View {
         }
         .background(Color.white)
         .foregroundColor(.blue)
-        .cornerRadius(8)
+        .clipShape(RoundedRectangle(cornerRadius: 8))
         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.blue, lineWidth: 1))
+        .accessibilityLabel(text)
     }
 }
 
@@ -46,22 +87,18 @@ struct PasswordField: View {
             HStack {
                 if showPassword {
                     TextField("Password", text: $text)
-                        .autocapitalization(.none)
+                        .textInputAutocapitalization(.never)
                 } else {
                     SecureField("Password", text: $text)
-                        .autocapitalization(.none)
+                        .textInputAutocapitalization(.never)
                 }
                 Button(action: { showPassword.toggle() }) {
                     Image(systemName: showPassword ? "eye.slash" : "eye")
                         .foregroundColor(.gray)
                 }
+                .accessibilityLabel(showPassword ? "Hide password" : "Show password")
             }
-            .padding(.vertical, 8)
-            .padding(.horizontal, 12)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-            )
+            .styledTextField()
         }
     }
 }
@@ -75,6 +112,31 @@ enum PasswordValidation {
         let special = pw.range(of: "[!@#%&*]", options: .regularExpression) != nil
         let digit = pw.range(of: "\\d", options: .regularExpression) != nil
         return pw.count >= 8 && lower && upper && special && digit
+    }
+}
+
+// MARK: - Login Option Button
+
+struct LoginOptionButton: View {
+    let text: String
+    let icon: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                Image(systemName: icon)
+                    .frame(width: 20)
+                Text(text)
+                    .font(.subheadline)
+            }
+            .frame(maxWidth: .infinity, minHeight: 44)
+        }
+        .background(Color.white)
+        .foregroundColor(.primary)
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.gray.opacity(0.3), lineWidth: 1))
+        .accessibilityLabel(text)
     }
 }
 

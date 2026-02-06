@@ -61,26 +61,16 @@ struct RegisterView: View {
                                             .font(.caption)
                                             .foregroundColor(.secondary)
                                         TextField("First name", text: $firstName)
-                                            .autocapitalization(.words)
-                                            .padding(.vertical, 8)
-                                            .padding(.horizontal, 12)
-                                            .background(
-                                                RoundedRectangle(cornerRadius: 8)
-                                                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                                            )
+                                            .textInputAutocapitalization(.words)
+                                            .styledTextField()
                                     }
                                     VStack(alignment: .leading) {
                                         Text("Last name")
                                             .font(.caption)
                                             .foregroundColor(.secondary)
                                         TextField("Last name", text: $lastName)
-                                            .autocapitalization(.words)
-                                            .padding(.vertical, 8)
-                                            .padding(.horizontal, 12)
-                                            .background(
-                                                RoundedRectangle(cornerRadius: 8)
-                                                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                                            )
+                                            .textInputAutocapitalization(.words)
+                                            .styledTextField()
                                     }
                                 }
                                 VStack(alignment: .leading) {
@@ -89,13 +79,8 @@ struct RegisterView: View {
                                         .foregroundColor(.secondary)
                                     TextField("Email", text: $email)
                                         .keyboardType(.emailAddress)
-                                        .autocapitalization(.none)
-                                        .padding(.vertical, 8)
-                                        .padding(.horizontal, 12)
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 8)
-                                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                                        )
+                                        .textInputAutocapitalization(.never)
+                                        .styledTextField()
                                 }
                                 VStack(alignment: .leading) {
                                     PasswordField(label: "Password", text: $password)
@@ -211,7 +196,8 @@ struct RegisterView: View {
                 UserDefaults.standard.set(state, forKey: "openfort:email_verification_state")
                 isLoading = false
                 emailConfirmation = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                Task {
+                    try? await Task.sleep(nanoseconds: 1_500_000_000)
                     dismiss()
                 }
             }
@@ -261,11 +247,10 @@ struct RegisterView: View {
                 return
             }
 
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                isLoading = false
-                emailConfirmation = true
-                toast = .success("Successfully signed up!")
-            }
+            try? await Task.sleep(nanoseconds: 1_500_000_000)
+            isLoading = false
+            emailConfirmation = true
+            toast = .success("Successfully signed up!")
         } catch {
             isLoading = false
             toast = .error("Failed to sign up: \(error)")
@@ -278,8 +263,6 @@ struct RegisterView: View {
     }
 }
 
-struct RegisterView_Previews: PreviewProvider {
-    static var previews: some View {
-        RegisterView()
-    }
+#Preview {
+    RegisterView()
 }

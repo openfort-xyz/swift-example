@@ -18,6 +18,7 @@ struct LoginView: View {
     @State private var isLoading: Bool = false
     @State private var showForgotPassword = false
     @State private var showSignUp = false
+    @State private var showEmailOTP = false
     @State private var toast: ToastState?
     @State private var isSignedIn = false
     @StateObject private var homeViewModel = HomeViewModel()
@@ -47,13 +48,8 @@ struct LoginView: View {
                                         .foregroundColor(.secondary)
                                     TextField("Email", text: $email)
                                         .keyboardType(.emailAddress)
-                                        .autocapitalization(.none)
-                                        .padding(.vertical, 8)
-                                        .padding(.horizontal, 12)
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 8)
-                                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                                        )
+                                        .textInputAutocapitalization(.never)
+                                        .styledTextField()
                                 }
 
                                 PasswordField(label: "Password", text: $password)
@@ -91,22 +87,7 @@ struct LoginView: View {
                             .cornerRadius(8)
                             .padding(.top, 12)
 
-                            Button(action: {
-                                Task {
-                                    await continueAsGuest()
-                                }
-                            }) {
-                                Text("Continue as Guest")
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 12)
-                                    .background(Color.white)
-                                    .foregroundColor(.blue)
-                                    .cornerRadius(8)
-                                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.blue, lineWidth: 1))
-                            }
-                            .padding(.top, 12)
-
-                            // Social buttons
+                            // Login options
                             socialButtonsView
 
                             HStack {
@@ -138,6 +119,12 @@ struct LoginView: View {
                 .sheet(isPresented: $showSignUp) {
                     RegisterView()
                 }
+                .sheet(isPresented: $showEmailOTP) {
+                    EmailOTPSheet {
+                        isSignedIn = true
+                        toast = .success("Signed in with Email Code!")
+                    }
+                }
             } else {
                 HomeView(viewModel: homeViewModel).onAppear {
                     homeViewModel.onLogout = {
@@ -161,61 +148,64 @@ struct LoginView: View {
             OrDivider()
 
             VStack(spacing: 8) {
-                HStack(spacing: 8) {
-                    SocialButton(text: "Continue with Google", icon: "globe") { continueWithGoogle() }
-                    SocialButton(text: "Continue with Twitter", icon: "bird") { continueWithTwitter() }
+                LoginOptionButton(text: "Continue with Email Code", icon: "envelope") {
+                    showEmailOTP = true
                 }
-                HStack(spacing: 8) {
-                    SocialButton(text: "Continue with Facebook", icon: "f.square") { continueWithFacebook() }
+
+                LoginOptionButton(text: "Continue as Guest", icon: "person") {
+                    Task { await continueAsGuest() }
+                }
+
+                LoginOptionButton(text: "Continue with Google", icon: "globe") {
+                    continueWithGoogle()
                 }
 
                 // Sign in with Apple
-                HStack(spacing: 8) {
-                    SignInWithAppleButton(.signIn, onRequest: { request in
-                        let nonce = AppleAuthManager.randomNonceString()
-                        currentNonce = nonce
-                        request.requestedScopes = [.fullName, .email]
-                        request.nonce = AppleAuthManager.sha256(nonce)
-                    }, onCompletion: { result in
-                        switch result {
-                        case .success(let auth):
-                            guard
-                                let credential = auth.credential as? ASAuthorizationAppleIDCredential,
-                                let tokenData = credential.identityToken,
-                                let idToken = String(data: tokenData, encoding: .utf8),
-                                !idToken.isEmpty
-                            else {
-                                toast = .error("Apple Sign-In: missing ID token")
-                                return
-                            }
-                            Task {
-                                do {
-                                    if useBiometrics {
-                                        let anchor = await currentPresentationAnchor()
-                                        let manager = AppleAuthManager(presentationAnchor: anchor)
-                                        _ = try await manager.authenticateWithBiometrics(reason: "Authenticate to continue")
-                                    }
-                                    _ = try await OFSDK.shared.loginWithIdToken(
-                                        params: OFLoginWithIdTokenParams(provider: OFAuthProvider.apple.rawValue, token: idToken)
-                                    )
-                                    isSignedIn = true
-                                    toast = .success("Signed in with Apple!")
-                                } catch {
-                                    toast = .error("Apple Sign-In failed: \(error.localizedDescription)")
-                                }
-                            }
-                        case .failure(let error):
-                            toast = .error("Apple Sign-In failed: \(error.localizedDescription)")
+                SignInWithAppleButton(.signIn, onRequest: { request in
+                    let nonce = AppleAuthManager.randomNonceString()
+                    currentNonce = nonce
+                    request.requestedScopes = [.fullName, .email]
+                    request.nonce = AppleAuthManager.sha256(nonce)
+                }, onCompletion: { result in
+                    switch result {
+                    case .success(let auth):
+                        guard
+                            let credential = auth.credential as? ASAuthorizationAppleIDCredential,
+                            let tokenData = credential.identityToken,
+                            let idToken = String(data: tokenData, encoding: .utf8),
+                            !idToken.isEmpty
+                        else {
+                            toast = .error("Apple Sign-In: missing ID token")
+                            return
                         }
-                    })
-                    .signInWithAppleButtonStyle(.black)
-                    .frame(maxWidth: .infinity, minHeight: 44)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                }
+                        Task {
+                            do {
+                                if useBiometrics {
+                                    let anchor = await AppleAuthManager.currentPresentationAnchor()
+                                    let manager = AppleAuthManager(presentationAnchor: anchor)
+                                    _ = try await manager.authenticateWithBiometrics(reason: "Authenticate to continue")
+                                }
+                                _ = try await OFSDK.shared.loginWithIdToken(
+                                    params: OFLoginWithIdTokenParams(provider: OFAuthProvider.apple.rawValue, token: idToken)
+                                )
+                                isSignedIn = true
+                                toast = .success("Signed in with Apple!")
+                            } catch {
+                                toast = .error("Apple Sign-In failed: \(error.localizedDescription)")
+                            }
+                        }
+                    case .failure(let error):
+                        toast = .error("Apple Sign-In failed: \(error.localizedDescription)")
+                    }
+                })
+                .signInWithAppleButtonStyle(.black)
+                .frame(maxWidth: .infinity, maxHeight: 44)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
 
                 Toggle("Require Face ID / Touch ID before signing in", isOn: $useBiometrics)
                     .font(.footnote)
                     .tint(.blue)
+                    .accessibilityHint("When enabled, biometric authentication is required before signing in")
             }
         }.onOpenURL { url in
             // Handle OAuth redirect carrying access/refresh tokens and player id
@@ -332,22 +322,9 @@ struct LoginView: View {
         startOAuth(provider: .google, successMessage: "Signed in with Google!")
     }
 
-    private func continueWithTwitter() {
-        startOAuth(provider: .twitter, successMessage: "Signed in with Twitter!")
-    }
-
-    private func continueWithFacebook() {
-        startOAuth(provider: .facebook, successMessage: "Signed in with Facebook!")
-    }
 }
 
 #Preview {
     LoginView()
 }
 
-private func currentPresentationAnchor() async -> ASPresentationAnchor {
-    await (UIApplication.shared.connectedScenes
-        .compactMap { $0 as? UIWindowScene }
-        .flatMap { $0.windows }
-        .first { $0.isKeyWindow } ?? UIWindow())
-}

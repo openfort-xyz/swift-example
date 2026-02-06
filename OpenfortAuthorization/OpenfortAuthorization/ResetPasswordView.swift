@@ -60,7 +60,7 @@ struct ResetPasswordView: View {
                     .disabled(isLoading)
                     .background(isLoading ? Color.gray.opacity(0.2) : Color.blue)
                     .foregroundColor(.white)
-                    .cornerRadius(8)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
                     .padding(.top, 24)
 
                     HStack {
@@ -77,7 +77,7 @@ struct ResetPasswordView: View {
                 }
                 .padding(28)
                 .background(Color.white)
-                .cornerRadius(16)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
                 .shadow(color: Color.black.opacity(0.10), radius: 10, x: 0, y: 4)
                 .padding(.horizontal, 8)
 
@@ -103,9 +103,8 @@ struct ResetPasswordView: View {
                 let params = OFResetPasswordParams(password: password, token: state)
                 try await OFSDK.shared.resetPassword(params: params)
                 toast = .success("Password reset successful!")
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-                    dismiss()
-                }
+                try? await Task.sleep(nanoseconds: 1_200_000_000)
+                dismiss()
             } catch {
                 toast = .error("Failed to reset password. Please try again.")
             }
@@ -113,8 +112,6 @@ struct ResetPasswordView: View {
     }
 }
 
-struct ResetPasswordView_Previews: PreviewProvider {
-    static var previews: some View {
-        ResetPasswordView(state: "", email: "")
-    }
+#Preview {
+    ResetPasswordView(state: "", email: "")
 }
