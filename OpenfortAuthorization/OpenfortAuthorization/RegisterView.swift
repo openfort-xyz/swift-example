@@ -312,7 +312,7 @@ struct RegisterView: View {
         error = nil
         isLoading = true
         do {
-            let result = try await openfort.signUpWith(params: OFSignUpWithEmailPasswordParams(email: email, password: password, options: OFSignUpWithEmailPasswordOptionsParams(data: ["name": "\(firstName) \(lastName)"])))
+            let result = try await openfort.signUpWithEmailPassword(params: OFSignUpWithEmailPasswordParams(email: email, password: password, options: OFSignUpWithEmailPasswordOptionsParams(data: ["name": "\(firstName) \(lastName)"])))
 
             // Check if email verification is required
             if let action = result?.action, action == "verify_email" {

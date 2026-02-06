@@ -127,7 +127,7 @@ struct ResetPasswordView: View {
         Task {
             defer { isLoading = false }
             do {
-                let params = OFResetPasswordParams(email: email, password: password, state: state)
+                let params = OFResetPasswordParams(password: password, token: state)
                 try await OFSDK.shared.resetPassword(params: params)
                 status = Status(type: .success)
                 // Optionally dismiss after a short delay

@@ -640,8 +640,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/openfort-xyz/swift-sdk.git";
 			requirement = {
-				branch = main;
-				kind = branch;
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
 			};
 		};
 		B91519552E4CC16400642529 /* XCRemoteSwiftPackageReference "Web3.swift" */ = {

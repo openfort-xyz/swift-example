@@ -13,8 +13,8 @@ import OpenfortSwift
 public struct WalletWithChainIds: Identifiable, Hashable {
     public let id: String
     public let address: String
-    public let accountType: String
-    public let chainType: String
+    public let accountType: OFAccountType
+    public let chainType: OFChainType
     public let implementationType: String?
     public var chainIds: [Int]
 
@@ -73,7 +73,7 @@ final class WalletListViewModel: ObservableObject {
                 return
             }
             // Filter only SMART_ACCOUNT like in TS
-            let smartWallets = walletsResponse.filter { $0.accountType.uppercased() == "SMART_ACCOUNT" }
+            let smartWallets = walletsResponse.filter { $0.accountType == .smartAccount }
 
             // Group by address (case-insensitive) and merge chainIds
             var map = [String: WalletWithChainIds]()  // key = lowercased address
@@ -236,7 +236,7 @@ public struct WalletListView: View {
                             .foregroundStyle(Color.accentColor)
                     }
                 }
-                Text("\(wallet.implementationType ?? "—") • \(wallet.chainType) • Chain IDs: \(wallet.chainIds.isEmpty ? "N/A" : wallet.chainIds.map(String.init).joined(separator: ", "))")
+                Text("\(wallet.implementationType ?? "—") • \(wallet.chainType.rawValue) • Chain IDs: \(wallet.chainIds.isEmpty ? "N/A" : wallet.chainIds.map(String.init).joined(separator: ", "))")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

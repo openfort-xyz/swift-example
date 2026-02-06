@@ -12,7 +12,7 @@ struct EncryptionSessionResponse: Decodable {
 }
 
 func getEncryptionSession(completion: @escaping (Result<String, Error>) -> Void) {
-    guard let url = URL(string: "https://openfort-auth-non-custodial.vercel.app/api/protected-create-encryption-session") else {
+    guard let url = URL(string: "https://create-next-app.openfort.io/api/protected-create-encryption-session") else {
         completion(.failure(NSError(domain: "InvalidURL", code: -1, userInfo: nil)))
         return
     }
