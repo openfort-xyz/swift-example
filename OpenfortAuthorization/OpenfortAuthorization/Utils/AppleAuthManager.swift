@@ -103,11 +103,20 @@ public final class AppleAuthManager: NSObject {
         }
     }
 
+    // MARK: - Static Helpers
+
+    static func currentPresentationAnchor() async -> ASPresentationAnchor {
+        await (UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap { $0.windows }
+            .first { $0.isKeyWindow } ?? UIWindow())
+    }
+
     // MARK: - Private
 
     private var delegateProxy: ControllerDelegate?
 
-    private static func randomNonceString(length: Int = 32) -> String {
+    static func randomNonceString(length: Int = 32) -> String {
         precondition(length > 0)
         let charset: [Character] = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
         var result = ""
@@ -130,7 +139,7 @@ public final class AppleAuthManager: NSObject {
         return result
     }
 
-    private static func sha256(_ input: String) -> String {
+    static func sha256(_ input: String) -> String {
         let data = Data(input.utf8)
         let hashed = SHA256.hash(data: data)
         return hashed.map { String(format: "%02x", $0) }.joined()
