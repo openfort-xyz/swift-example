@@ -298,7 +298,7 @@ struct LoginView: View {
                     Task {
                         do {
                             // Store credentials into Openfort SDK
-                            try await openfort.storeCredentials(params: OFStoreCredentialsParams(player: playerId, accessToken: accessToken, refreshToken: refreshToken))
+                            try await openfort.storeCredentials(params: OFStoreCredentialsParams(token: accessToken, userId: playerId ?? ""))
 
                             // Consider user signed in and transition to Home
                             isSignedIn = true
@@ -357,7 +357,7 @@ struct LoginView: View {
     private func verifyEmail() async {
         if let email = UserDefaults.standard.string(forKey: "openfort:email"), let state = UserDefaults.standard.string(forKey: "openfort:email_verification_state") {
             do {
-                try await OFSDK.shared.verifyEmail(params: OFVerifyEmailParams(email: email, state: state))
+                try await OFSDK.shared.verifyEmail(params: OFVerifyEmailParams(token: state))
                 isLoading = false
                 toastMessage = "Email verified successfully!"
                 showToast = true
@@ -401,7 +401,7 @@ struct LoginView: View {
         let password = self.password
         
         do {
-            let result = try await OFSDK.shared.loginWith(params: OFAuthEmailPasswordParams(email: username, password: password))
+            let result = try await OFSDK.shared.logInWithEmailPassword(params: OFLogInWithEmailPasswordParams(email: username, password: password))
             print(result ?? "Empty response!")
             isLoading = false
             toastMessage = "Signed in!"

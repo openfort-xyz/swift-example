@@ -23,7 +23,7 @@ struct HomeView: View {
                             VStack(spacing: 18) {
                                 Text("Set up your embedded signer")
                                     .font(.title2).bold()
-                                Text("Welcome, \(viewModel.user?.player?.name ?? viewModel.user?.id ?? "User")!")
+                                Text("Welcome, \(viewModel.user?.name ?? viewModel.user?.id ?? "User")!")
                                     .foregroundColor(.gray)
                                 // Logout
                                 HStack {
@@ -80,10 +80,13 @@ struct HomeView: View {
                                     
                                     // Embedded wallet
                                     EmbeddedWalletPanelView(handleSetMessage: viewModel.handleSetMessage, viewModel: EmbeddedWalletPanelViewModel(embeddedState: viewModel.state, embeddedAccount: viewModel.embeddedAccount))
+                                    // New methods test panel
+                                    NewMethodsTestView(handleSetMessage: viewModel.handleSetMessage)
+
                                    /*
                                     // Wallet Connect
                                     WalletConnectPanelView(viewModel: WalletConnectPanelViewModel())
-                                    
+
                                     // Funding
                                     FundingPanelView(handleSetMessage: viewModel.handleSetMessage)*/
                                 }
@@ -189,7 +192,7 @@ struct SidebarIntroView: View {
 @MainActor
 class HomeViewModel: ObservableObject {
     @Published var state: OFEmbeddedState = .none
-    @Published var user: OFGetUserInstanceResponse?
+    @Published var user: OFUser?
     @Published var embeddedAccount: OFEmbeddedAccount?
     @Published var message: String = ""
     var onLogout: (() -> Void)?
@@ -209,7 +212,7 @@ class HomeViewModel: ObservableObject {
 
                 let recoveryParams = OFRecoveryParamsDTO(recoveryMethod: .password, password: password)
                 print("[HomeViewModel] Calling OFSDK.shared.configure...")
-                let result = try await OFSDK.shared.configure(params: OFConfigureEmbeddedWalletDTO(chainId: chainId, recoveryParams: recoveryParams))
+                let result = try await OFSDK.shared.configure(params: OFEmbeddedAccountConfigureParams(chainId: chainId, recoveryParams: recoveryParams))
                 self.embeddedAccount = result
                 print("[HomeViewModel] Configure succeeded! Result: \(String(describing: result))")
                 self.message = "Embedded wallet configured successfully with password recovery.\n\n" + self.message
@@ -227,7 +230,7 @@ class HomeViewModel: ObservableObject {
 
                 let recoveryParams = OFRecoveryParamsDTO(recoveryMethod: .automatic, encryptionSession: session)
                 print("[HomeViewModel] Calling OFSDK.shared.configure...")
-                let result = try await OFSDK.shared.configure(params: OFConfigureEmbeddedWalletDTO(chainId: chainId, recoveryParams: recoveryParams))
+                let result = try await OFSDK.shared.configure(params: OFEmbeddedAccountConfigureParams(chainId: chainId, recoveryParams: recoveryParams))
                 self.embeddedAccount = result
                 print("[HomeViewModel] Configure succeeded! Result: \(String(describing: result))")
                 self.message = "Embedded wallet configured successfully with automatic recovery.\n\n" + self.message
