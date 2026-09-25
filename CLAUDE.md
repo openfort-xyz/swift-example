@@ -14,6 +14,7 @@ xcodebuild -project OpenfortAuthorization/OpenfortAuthorization.xcodeproj -schem
 ```
 
 ### Run Tests
+Both test targets run against the live Openfort test project in `OFConfig.plist` and need network access.
 ```bash
 # Run all tests
 xcodebuild test -project OpenfortAuthorization/OpenfortAuthorization.xcodeproj -scheme OpenfortAuthorization -destination 'platform=iOS Simulator,name=iPhone 15'
@@ -163,9 +164,9 @@ Deep links are handled via `.onOpenURL` modifier. The URL scheme is derived from
 
 ## Dependencies
 The project uses Swift Package Manager for dependencies:
-- **OpenfortSwift** (>= 1.0.0) - Main SDK from `https://github.com/openfort-xyz/swift-sdk.git`
+- **OpenfortSwift** (>= 3.0.0) - Main SDK from `https://github.com/openfort-xyz/swift-sdk.git`
 
-Key transitive dependencies include Web3.swift, secp256k1.swift, CryptoSwift, BigInt, PromiseKit, swift-crypto, and swift-nio.
+The SDK has no third-party dependencies; only `swift-docc-plugin` is pulled in for documentation builds.
 
 ## Common Development Tasks
 

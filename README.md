@@ -88,7 +88,7 @@ The app follows a **SwiftUI + MVVM** pattern:
 
 Managed via Swift Package Manager:
 
-- [OpenfortSwift](https://github.com/openfort-xyz/swift-sdk) (>= 1.0.0) - Openfort SDK for authentication, wallet management, and signing
+- [OpenfortSwift](https://github.com/openfort-xyz/swift-sdk) (>= 3.0.0) - Openfort SDK for authentication, wallet management, and signing
 
 ## License
 

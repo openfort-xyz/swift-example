@@ -631,7 +631,7 @@
 			repositoryURL = "https://github.com/openfort-xyz/swift-sdk.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
+				minimumVersion = 3.0.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

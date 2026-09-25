@@ -79,6 +79,7 @@ struct HomeView: View {
             }
         }
         .toast($toast)
+        .task { await viewModel.loadUser() }
         .onChange(of: viewModel.lastMessage) { msg in
             if let msg = msg {
                 toast = .result(msg)

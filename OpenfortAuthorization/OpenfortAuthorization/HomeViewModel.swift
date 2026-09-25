@@ -48,10 +48,6 @@ class HomeViewModel: ObservableObject {
             .replaceNil(with: .none)
             .receive(on: DispatchQueue.main)
             .assign(to: \.state, on: self)
-
-        Task {
-            await loadUser()
-        }
     }
 
     func loadUser() async {
